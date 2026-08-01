@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate TV Receiver V9</title>
+    
+    <style>
+        :root {
+            --bg: #020617;
+            --panel: #0f172a;
+            --sidebar-bg: #1e293b;
+            --primary: #2563eb;
+            --bein-purple: #7c3aed;
+            --text: #f8fafc;
+            --accent: #facc15;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* المشغل */
+        .player-section {
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16 / 9;
+            max-height: 45vh;
+            position: relative;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        #loader {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 100; display: none;
+            justify-content: center; align-items: center;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #1e293b; border-top-color: var(--primary);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* الواجهة */
+        .main-ui {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* القائمة الجانبية (الباقات الـ 5) */
+        .sidebar {
+            width: 180px;
+            background: var(--sidebar-bg);
+            border-left: 2px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .group-btn {
+            padding: 20px 15px;
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            text-align: right;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 1px solid #334155;
+            font-size: 1rem;
+        }
+
+        .group-btn:focus, .group-btn.active {
+            background: var(--primary);
+            color: white;
+            outline: none;
+            border-right: 5px solid var(--accent);
+        }
+
+        .group-btn.bein-group {
+            background: var(--bein-purple);
+            color: white;
+            border-bottom: 2px solid #fff;
+        }
+
+        /* شبكة القنوات */
+        .content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            align-content: start;
+        }
+
+        .ch-btn {
+            background: #334155;
+            border: 2px solid transparent;
+            color: white;
+            padding: 15px 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .ch-btn:focus {
+            background: var(--primary);
+            border-color: var(--accent);
+            transform: scale(1.1);
+            outline: none;
+        }
+
+        .ch-btn.active {
+            background: #10b981;
+            border-color: white;
+        }
+
+        @media (max-width: 600px) {
+            .sidebar { width: 110px; font-size: 0.8rem; }
+            .content { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="player-section">
+        <div id="loader"><div class="spinner"></div></div>
+        <iframe 
+            id="mainPlayer" 
+            src="" 
+            allowfullscreen 
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            referrerpolicy="no-referrer">
+        </iframe>
+    </div>
+
+    <div class="main-ui">
+        <div class="sidebar" id="sidebar"></div>
+        <div class="content" id="channelsGrid"></div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const grid = document.getElementById('channelsGrid');
+        const player = document.getElementById('mainPlayer');
+        const loader = document.getElementById('loader');
+
+        let currentChId = localStorage.getItem('last_ch_v9') || 90;
+
+        // تقسيم القنوات: beIN + 4 باقات كبرى
+        const groups = [
+            { name: "🟣 beIN Sports", start: 90, end: 104, type: 'bein' },
+            { name: "🔵 الباقة الكبرى 1", start: 1, end: 22 },
+            { name: "🔵 الباقة الكبرى 2", start: 23, end: 44 },
+            { name: "🔵 الباقة الكبرى 3", start: 45, end: 66 },
+            { name: "🔵 الباقة الكبرى 4", start: 67, end: 89 }
+        ];
+
+        function initSidebar() {
+            groups.forEach((group, index) => {
+                const btn = document.createElement('button');
+                btn.className = `group-btn ${group.type === 'bein' ? 'bein-group' : ''}`;
+                btn.innerText = group.name;
+                btn.onclick = () => {
+                    document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    showChannels(group.start, group.end);
+                };
+                sidebar.appendChild(btn);
+                if(index === 0) btn.click();
+            });
+        }
+
+        function showChannels(start, end) {
+            grid.innerHTML = "";
+            for (let i = start; i <= end; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'ch-btn';
+                if (i == currentChId) btn.classList.add('active');
+                const name = (i >= 90 && i <= 104) ? `beIN ${i - 89}` : `قناة ${i}`;
+                btn.innerText = name;
+                btn.onclick = () => loadStream(i, btn);
+                grid.appendChild(btn);
+            }
+        }
+
+        function loadStream(id, btnElement) {
+            currentChId = id;
+            localStorage.setItem('last_ch_v9', id);
+            
+            document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+
+            loader.style.display = 'flex';
+            player.src = "about:blank";
+            setTimeout(() => {
+                player.src = `https://dlhd.st/embed/stream-${id}.php`;
+            }, 150);
+            setTimeout(() => { loader.style.display = 'none'; }, 2000);
+        }
+
+        // دعم الريموت
+        document.addEventListener('keydown', (e) => {
+            const active = document.activeElement;
+            const sideBtns = Array.from(document.querySelectorAll('.group-btn'));
+            const chBtns = Array.from(document.querySelectorAll('.ch-btn'));
+
+            if (e.key === 'ArrowLeft' && sideBtns.includes(active)) {
+                if (chBtns.length > 0) chBtns[0].focus();
+            }
+            if (e.key === 'ArrowRight' && chBtns.includes(active)) {
+                const currentGroup = document.querySelector('.group-btn.active');
+                if (currentGroup) currentGroup.focus();
+            }
+        });
+
+        window.onload = initSidebar;
+    </script>
+</body>
+</html>
