@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate TV Receiver V9</title>
+    <title>Receiver Pro V10 - Organized Edition</title>
     
     <style>
         :root {
@@ -14,6 +14,7 @@
             --bein-purple: #7c3aed;
             --text: #f8fafc;
             --accent: #facc15;
+            --arabic-green: #14b8a6;
         }
 
         body {
@@ -27,7 +28,7 @@
             overflow: hidden;
         }
 
-        /* المشغل */
+        /* قسم المشغل */
         .player-section {
             width: 100%;
             background: #000;
@@ -43,7 +44,7 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 100; display: none;
-            justify-content: center; align-items: center;
+            flex-direction: column; justify-content: center; align-items: center;
         }
         .spinner {
             width: 40px; height: 40px;
@@ -52,24 +53,25 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* الواجهة */
+        /* الواجهة الرئيسية */
         .main-ui {
             flex: 1;
             display: flex;
             overflow: hidden;
         }
 
-        /* القائمة الجانبية (الباقات الـ 5) */
+        /* القائمة الجانبية للباقات */
         .sidebar {
-            width: 180px;
+            width: 200px;
             background: var(--sidebar-bg);
             border-left: 2px solid #334155;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
         }
 
         .group-btn {
-            padding: 20px 15px;
+            padding: 18px 12px;
             background: transparent;
             border: none;
             color: #94a3b8;
@@ -77,7 +79,8 @@
             cursor: pointer;
             font-weight: bold;
             border-bottom: 1px solid #334155;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            transition: 0.2s;
         }
 
         .group-btn:focus, .group-btn.active {
@@ -87,11 +90,11 @@
             border-right: 5px solid var(--accent);
         }
 
-        .group-btn.bein-group {
-            background: var(--bein-purple);
-            color: white;
-            border-bottom: 2px solid #fff;
-        }
+        .group-btn.bein-group { background: var(--bein-purple); color: white; }
+        .group-btn.bein-group.active { background: #9333ea; }
+
+        .group-btn.arabic-group { background: var(--arabic-green); color: white; }
+        .group-btn.arabic-group.active { background: #0f766e; }
 
         /* شبكة القنوات */
         .content {
@@ -99,7 +102,7 @@
             padding: 15px;
             overflow-y: auto;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 12px;
             align-content: start;
         }
@@ -108,11 +111,13 @@
             background: #334155;
             border: 2px solid transparent;
             color: white;
-            padding: 15px 5px;
-            border-radius: 10px;
+            padding: 12px 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             text-align: center;
+            font-size: 0.85rem;
+            transition: 0.2s;
         }
 
         .ch-btn:focus {
@@ -128,7 +133,7 @@
         }
 
         @media (max-width: 600px) {
-            .sidebar { width: 110px; font-size: 0.8rem; }
+            .sidebar { width: 120px; font-size: 0.8rem; }
             .content { grid-template-columns: repeat(3, 1fr); gap: 8px; }
         }
     </style>
@@ -136,14 +141,8 @@
 <body>
 
     <div class="player-section">
-        <div id="loader"><div class="spinner"></div></div>
-        <iframe 
-            id="mainPlayer" 
-            src="" 
-            allowfullscreen 
-            sandbox="allow-scripts allow-same-origin allow-forms"
-            referrerpolicy="no-referrer">
-        </iframe>
+        <div id="loader"><div class="spinner"></div><p style="color:white; margin-top:10px;">جاري تحميل البث...</p></div>
+        <iframe id="mainPlayer" src="" allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" referrerpolicy="no-referrer"></iframe>
     </div>
 
     <div class="main-ui">
@@ -157,76 +156,112 @@
         const player = document.getElementById('mainPlayer');
         const loader = document.getElementById('loader');
 
-        let currentChId = localStorage.getItem('last_ch_v9') || 90;
+        let currentChId = localStorage.getItem('last_ch_v10') || null;
+        let activeGroupIdx = 0;
+        const BASE_URL = 'https://dlhd.st/embed/stream-';
 
-        // تقسيم القنوات: beIN + 4 باقات كبرى
-        const groups = [
-            { name: "🟣 beIN Sports", start: 90, end: 104, type: 'bein' },
-            { name: "🔵 الباقة الكبرى 1", start: 1, end: 22 },
-            { name: "🔵 الباقة الكبرى 2", start: 23, end: 44 },
-            { name: "🔵 الباقة الكبرى 3", start: 45, end: 66 },
-            { name: "🔵 الباقة الكبرى 4", start: 67, end: 89 }
-        ];
+        const rawData = {
+            "USA & Canada (General, Movies & Documentaries)": [
+                {"name": "ABC USA", "id": 51}, {"name": "AHC", "id": 206}, {"name": "Antenna TV", "id": 283}, {"name": "A&E USA", "id": 302}, {"name": "AMC USA", "id": 303}, {"name": "Animal Planet", "id": 304}, {"name": "Adult Swim", "id": 295}, {"name": "AXS TV", "id": 742}, {"name": "ABC NY", "id": 766}, {"name": "BBC America", "id": 305}, {"name": "BET USA", "id": 306}, {"name": "Bravo USA", "id": 307}, {"name": "CW PIX 11", "id": 280}, {"name": "CBS USA", "id": 52}, {"name": "Court TV", "id": 281}, {"name": "CW USA", "id": 300}, {"name": "CNBC USA", "id": 309}, {"name": "Comedy Central", "id": 310}, {"name": "Cartoon Network", "id": 339}, {"name": "CNN USA", "id": 345}, {"name": "Cinemax USA", "id": 374}, {"name": "COZI TV", "id": 748}, {"name": "CMT USA", "id": 647}, {"name": "CTV Canada", "id": 602}, {"name": "CTV 2 Canada", "id": 838}, {"name": "Crime+ Investigation", "id": 669}, {"name": "Comet USA", "id": 696}, {"name": "Cooking Channel", "id": 697}, {"name": "Cleo TV", "id": 715}, {"name": "C SPAN 1", "id": 750}, {"name": "CBSNY USA", "id": 767}, {"name": "Discovery Life", "id": 311}, {"name": "Disney Channel", "id": 312}, {"name": "Discovery Channel", "id": 313}, {"name": "Discovery Family", "id": 657}, {"name": "Disney XD", "id": 314}, {"name": "Destination America", "id": 651}, {"name": "Disney JR", "id": 652}, {"name": "Big Brother S28 C1", "id": 891}, {"name": "Big Brother S28 C2", "id": 892}, {"name": "Big Brother S28 C3", "id": 893}, {"name": "Big Brother S28 C4", "id": 894}, {"name": "Big Brother Quad", "id": 895}, {"name": "MSNBC", "id": 327}, {"name": "Magnolia Network", "id": 299}, {"name": "MTV USA", "id": 371}, {"name": "MY9TV USA", "id": 654}, {"name": "METV USA", "id": 662}, {"name": "MGM+ USA", "id": 791}, {"name": "NewsNation", "id": 292}, {"name": "Nat Geo", "id": 328}, {"name": "NICK JR", "id": 329}, {"name": "NICK", "id": 330}, {"name": "Nicktoons", "id": 649}, {"name": "Newsmax USA", "id": 613}, {"name": "Nat Geo Wild", "id": 745}, {"name": "Noovo CA", "id": 835}, {"name": "NBC Universo", "id": 845}, {"name": "OWN", "id": 331}, {"name": "Oxygen Crime", "id": 332}, {"name": "Paramount Net", "id": 334}, {"name": "POP TV USA", "id": 653}, {"name": "PBS USA", "id": 210}, {"name": "Reelz Channel", "id": 293}, {"name": "Starz Cinema", "id": 970}, {"name": "Starz Comedy", "id": 971}, {"name": "Starz Edge", "id": 972}, {"name": "Starz In Black", "id": 973}, {"name": "Starz Kids", "id": 974}, {"name": "Starz Encore", "id": 975}, {"name": "Encore Action", "id": 976}, {"0": "Encore Black", "id": 977}, {"name": "Encore Classic", "id": 978}, {"name": "Encore Family", "id": 979}, {"name": "Encore Suspense", "id": 980}, {"name": "Encore Westerns", "id": 981}, {"name": "Hallmark Channel", "id": 320}, {"name": "TBS USA", "id": 336}, {"name": "TLC", "id": 337}, {"name": "TNT USA", "id": 338}, {"name": "Travel Channel", "id": 340}, {"name": "TruTV USA", "id": 341}, {"name": "TVLAND", "id": 342}, {"name": "TCM USA", "id": 644}, {"name": "TMC USA", "id": 698}, {"name": "Food Network", "id": 384}, {"name": "Weather Channel", "id": 394}, {"name": "TeenNick", "id": 650}, {"name": "TV ONE USA", "id": 660}, {"name": "TVO CA", "id": 842}, {"name": "USA Network", "id": 343}, {"name": "Universal Kids", "id": 668}, {"name": "VH1 USA", "id": 344}, {"name": "VICE TV", "id": 659}, {"name": "WETV USA", "id": 655}
+            ],
+            "USA & Canada Sports Networks": [
+                {"name": "ACC Network", "id": 664}, {"name": "Altitude Sports", "id": 923}, {"name": "BIG TEN Net", "id": 397}, {"name": "CBS Sports Net", "id": 308}, {"name": "Chicago Sports", "id": 776}, {"name": "ESPN USA", "id": 44}, {"name": "ESPN2 USA", "id": 45}, {"name": "ESPNU USA", "id": 316}, {"name": "ESPNews", "id": 288}, {"name": "CBS Golazo", "id": 910}, {"name": "MSG USA", "id": 765}, {"name": "Marquee Sports", "id": 770}, {"name": "MLB Network", "id": 399}, {"name": "MASN USA", "id": 829}, {"name": "Monumental Net", "id": 778}, {"name": "NESN USA", "id": 762}, {"name": "NBC USA", "id": 53}, {"name": "NBA TV", "id": 404}, {"name": "NBC Sports PHI", "id": 777}, {"name": "NFL Network", "id": 405}, {"name": "NBC Bay Area", "id": 753}, {"name": "NBC Boston", "id": 754}, {"name": "NBC California", "id": 755}, {"name": "NBC10 PHI", "id": 277}, {"name": "NBCNY Sports", "id": 769}, {"name": "NHL Network", "id": 663}, {"name": "NFL RedZone", "id": 667}, {"name": "Pac-12 Net", "id": 287}, {"name": "Racer TV", "id": 646}, {"name": "Root Sports NW", "id": 920}, {"name": "SNY NY", "id": 759}, {"name": "Spectrum Sports", "id": 982}, {"name": "Spectrum LA", "id": 764}, {"name": "SEC Network", "id": 385}, {"name": "Sportsnet ON", "id": 406}, {"name": "Sportsnet One", "id": 411}, {"name": "Sportsnet West", "id": 407}, {"name": "Sportsnet East", "id": 408}, {"name": "Sportsnet 360", "id": 409}, {"name": "Sportsnet World", "id": 410}, {"name": "TSN1", "id": 111}, {"name": "TSN2", "id": 112}, {"name": "TSN3", "id": 113}, {"name": "TSN4", "id": 114}, {"name": "TSN5", "id": 115}, {"name": "TUDN USA", "id": 66}, {"name": "Telemundo", "id": 131}, {"name": "TVA Sports", "id": 833}, {"name": "TVA Sports 2", "id": 834}, {"name": "Univision", "id": 132}, {"name": "Unimas", "id": 133}, {"name": "Tennis Channel", "id": 40}, {"name": "Outdoor Channel", "id": 848}, {"name": "Citytv", "id": 831}, {"name": "CBC CA", "id": 832}, {"name": "RDS CA", "id": 839}, {"name": "RDS 2 CA", "id": 840}, {"name": "RDS Info CA", "id": 841}
+            ],
+            "Arabic Channels & SSC Sport (MENA)": [
+                {"name": "beIN Sports 1", "id": 91}, {"name": "beIN Sports 2", "id": 92}, {"name": "beIN Sports 3", "id": 93}, {"name": "beIN Sports 4", "id": 94}, {"name": "beIN Sports 5", "id": 95}, {"name": "beIN Sports 6", "id": 96}, {"name": "beIN Sports 7", "id": 97}, {"name": "beIN Sports 8", "id": 98}, {"name": "beIN Sports 9", "id": 99}, {"name": "beIN English 1", "id": 61}, {"name": "beIN English 2", "id": 90}, {"name": "beIN XTRA 1", "id": 100}, {"name": "beIN HD Qatar", "id": 578}, {"name": "beIN MAX AR", "id": 597}, {"name": "Alkass One", "id": 781}, {"name": "Alkass Two", "id": 782}, {"name": "Alkass Three", "id": 783}, {"name": "Alkass Four", "id": 784}, {"name": "Abu Dhabi 1", "id": 600}, {"name": "Abu Dhabi 2", "id": 601}, {"name": "Abu Dhabi Prem 1", "id": 609}, {"name": "Abu Dhabi Prem 2", "id": 610}, {"name": "Dubai Sports 1", "id": 604}, {"name": "Dubai Sports 2", "id": 605}, {"name": "Dubai Sports 3", "id": 606}, {"name": "Dubai Racing 2", "id": 608}, {"name": "OnTime Sports", "id": 611}, {"name": "CricLife 1 HD", "id": 284}, {"name": "SSC Sport 1", "id": 614}, {"name": "SSC Sport 2", "id": 615}, {"name": "SSC Sport 3", "id": 616}, {"name": "SSC Sport 4", "id": 617}, {"name": "SSC Sport 5", "id": 618}, {"name": "SSC Extra 1", "id": 619}, {"name": "SSC Extra 2", "id": 620}, {"name": "SSC Extra 3", "id": 621}
+            ]
+        };
 
-        function initSidebar() {
-            groups.forEach((group, index) => {
+        const finalGroups = [];
+
+        // الترتيب والتنظيم:
+        // 1. استخراج beIN
+        const beinList = rawData["Arabic Channels & SSC Sport (MENA)"].filter(ch => ch.name.toLowerCase().includes('bein'));
+        finalGroups.push({ name: "🟣 beIN Sports", channels: beinList, type: 'bein' });
+
+        // 2. الباقة الغربية الرياضية
+        finalGroups.push({ name: "🇺🇸 USA Sports", channels: rawData["USA & Canada Sports Networks"] });
+
+        // 3. تقسيم الباقة الغربية العامة إلى جزئين
+        const generalList = rawData["USA & Canada (General, Movies & Documentaries)"];
+        const half = Math.ceil(generalList.length / 2);
+        finalGroups.push({ name: "🎬 USA General P1", channels: generalList.slice(0, half) });
+        finalGroups.push({ name: "🎬 USA General P2", channels: generalList.slice(half) });
+
+        // 4. الباقة العربية و SSC (بدون beIN)
+        const arabicList = rawData["Arabic Channels & SSC Sport (MENA)"].filter(ch => !ch.name.toLowerCase().includes('bein'));
+        finalGroups.push({ name: "🟢 Arabic & SSC", channels: arabicList, type: 'arabic' });
+
+        function initApp() {
+            finalGroups.forEach((group, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `group-btn ${group.type === 'bein' ? 'bein-group' : ''}`;
+                btn.className = `group-btn ${group.type === 'bein' ? 'bein-group' : ''} ${group.type === 'arabic' ? 'arabic-group' : ''}`;
                 btn.innerText = group.name;
-                btn.onclick = () => {
-                    document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    showChannels(group.start, group.end);
-                };
+                btn.onclick = () => selectGroup(idx);
                 sidebar.appendChild(btn);
-                if(index === 0) btn.click();
+            });
+
+            // تحميل الحالة الأخيرة
+            if (!currentChId && finalGroups[0].channels.length > 0) currentChId = finalGroups[0].channels[0].id;
+            const startGroup = finalGroups.findIndex(g => g.channels.some(c => c.id == currentChId)) || 0;
+            selectGroup(startGroup >= 0 ? startGroup : 0);
+        }
+
+        function selectGroup(idx) {
+            activeGroupIdx = idx;
+            document.querySelectorAll('.group-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+            grid.innerHTML = "";
+            finalGroups[idx].channels.forEach(ch => {
+                const btn = document.createElement('button');
+                btn.className = `ch-btn ${ch.id == currentChId ? 'active' : ''}`;
+                btn.innerText = ch.name;
+                btn.id = `ch-${ch.id}`;
+                btn.onclick = () => loadStream(ch.id, btn);
+                grid.appendChild(btn);
             });
         }
 
-        function showChannels(start, end) {
-            grid.innerHTML = "";
-            for (let i = start; i <= end; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'ch-btn';
-                if (i == currentChId) btn.classList.add('active');
-                const name = (i >= 90 && i <= 104) ? `beIN ${i - 89}` : `قناة ${i}`;
-                btn.innerText = name;
-                btn.onclick = () => loadStream(i, btn);
-                grid.appendChild(btn);
-            }
-        }
-
-        function loadStream(id, btnElement) {
+        function loadStream(id, btn) {
             currentChId = id;
-            localStorage.setItem('last_ch_v9', id);
-            
+            localStorage.setItem('last_ch_v10', id);
             document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('active'));
-            if(btnElement) btnElement.classList.add('active');
-
+            if(btn) btn.classList.add('active');
             loader.style.display = 'flex';
             player.src = "about:blank";
-            setTimeout(() => {
-                player.src = `https://dlhd.st/embed/stream-${id}.php`;
-            }, 150);
+            setTimeout(() => { player.src = `${BASE_URL}${id}.php`; }, 200);
             setTimeout(() => { loader.style.display = 'none'; }, 2000);
         }
 
-        // دعم الريموت
+        // تحسين التنقل بالريموت
         document.addEventListener('keydown', (e) => {
             const active = document.activeElement;
-            const sideBtns = Array.from(document.querySelectorAll('.group-btn'));
-            const chBtns = Array.from(document.querySelectorAll('.ch-btn'));
+            const sBtns = Array.from(document.querySelectorAll('.group-btn'));
+            const cBtns = Array.from(document.querySelectorAll('.ch-btn'));
 
-            if (e.key === 'ArrowLeft' && sideBtns.includes(active)) {
-                if (chBtns.length > 0) chBtns[0].focus();
-            }
-            if (e.key === 'ArrowRight' && chBtns.includes(active)) {
-                const currentGroup = document.querySelector('.group-btn.active');
-                if (currentGroup) currentGroup.focus();
+            if (e.key === 'ArrowDown') {
+                if (sBtns.includes(active)) sBtns[sBtns.indexOf(active) + 1]?.focus();
+                else if (cBtns.includes(active)) {
+                    const cols = window.getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+                    cBtns[cBtns.indexOf(active) + cols]?.focus();
+                }
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                if (sBtns.includes(active)) sBtns[sBtns.indexOf(active) - 1]?.focus();
+                else if (cBtns.includes(active)) {
+                    const cols = window.getComputedStyle(grid).gridTemplateColumns.split(' ').length;
+                    cBtns[cBtns.indexOf(active) - cols]?.focus();
+                }
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                if (sBtns.includes(active)) cBtns[0]?.focus();
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                if (cBtns.includes(active)) sBtns[activeGroupIdx].focus();
+                e.preventDefault();
             }
         });
 
-        window.onload = initSidebar;
+        window.onload = initApp;
     </script>
 </body>
 </html>
