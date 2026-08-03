@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KiKON-tv ULTRA V60 | Full 189 Channels</title>
+    <title>KiKON-tv</title>
     <style>
         :root {
             --bg: #020617;
@@ -25,21 +25,63 @@
         .player-area { position: relative; width: 100%; background: #000; flex: 0 0 55vh; border-bottom: 3px solid var(--primary); overflow: hidden; }
         iframe { width: 100%; height: 100%; border: none; z-index: 1; }
 
+        /* 🛡️ درع الحماية المعدل لابتلاع الإشعار والصورة بالكامل */
         .kikon-shield {
             position: absolute;
-            top: 5px; right: 5px;
-            width: 140px; height: 55px;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            z-index: 10;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent); font-weight: 900; font-size: 1.2rem;
-            border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
-            pointer-events: none; 
-            box-shadow: -10px 10px 25px rgba(0,0,0,0.9);
+            top: 0;
+            right: 0;
+            width: 320px; /* توسيع العرض لإخفاء الفقرة الزرقاء والصورة تماماً */
+            height: 95px;  /* زيادة الارتفاع لمنع ظهور أي جزء من الإعلان */
+            background: #020617; /* لون غامق يحجب ما تحته تماماً */
+            z-index: 150; /* درجة أولوية قصوى فوق المشغل والإعلانات */
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            color: var(--accent); 
+            font-weight: 900; 
+            font-size: 1.3rem;
+            border-bottom-left-radius: 20px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: auto; /* يمنع الضغط على أي عنصر خلفه */
+            box-shadow: -5px 5px 25px rgba(0,0,0,0.9);
         }
 
-        #adBreaker { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; background: rgba(0,0,0,0.01); cursor: pointer; display: none; }
+        /* قناع حجب الإعلانات يغطي 85% ويترك شريط الصوت والتحكم السفلي */
+        #adBreaker { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 85%; 
+            z-index: 100; 
+            background: rgba(0,0,0,0.01); 
+            cursor: pointer; 
+            display: none; 
+        }
+
+        /* تلميح الصوت */
+        #soundTip {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.85);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 90;
+            pointer-events: none;
+            border: 1px solid var(--accent);
+            display: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.3; }
+        }
 
         .main-ui { flex: 1; display: flex; overflow: hidden; }
         .sidebar { width: 170px; background: var(--sidebar); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; }
@@ -100,7 +142,21 @@
 
         #loader { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:900; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 600px) { .sidebar { width: 110px; } .grid { grid-template-columns: repeat(3, 1fr); } .player-area { flex: 0 0 35vh; } .kikon-shield { width: 110px; height: 40px; font-size: 1rem; } }
+
+        /* تحسين الاستجابة للهواتف المحمولة */
+        @media (max-width: 600px) { 
+            .sidebar { width: 110px; } 
+            .grid { grid-template-columns: repeat(3, 1fr); } 
+            .player-area { flex: 0 0 38vh; } 
+            .kikon-shield { width: 250px; height: 75px; font-size: 1rem; } 
+        }
+
+        /* تحسين الاستجابة للشاشات الكبيرة والتلفاز */
+        @media (min-width: 1024px) {
+            .player-area { flex: 0 0 60vh; }
+            .ch-card { font-size: 0.9rem; min-height: 65px; }
+            .kikon-shield { width: 340px; height: 100px; font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body>
@@ -113,9 +169,9 @@
 <div class="player-area">
     <div id="loader"><div style="border:3px solid #fff; border-top:3px solid var(--primary); border-radius:50%; width:30px; height:30px; animation: spin 1s linear infinite;"></div></div>
     <div class="kikon-shield">KiKON-tv</div>
+    <div id="soundTip">🔊 اضغط على أيقونة الصوت بالأسفل</div>
     <div id="adBreaker" onclick="this.style.display='none'"></div>
-    <!-- إضافة autoplay والترخيص المباشر للصوت -->
-    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media; microphone; camera" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer"></iframe>
+    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer"></iframe>
 </div>
 
 <div class="main-ui">
@@ -172,6 +228,7 @@ const loader = document.getElementById('loader');
 const secretBtn = document.getElementById('secretLock');
 const keypad = document.getElementById('keypadLock');
 const pinDots = document.getElementById('pinDots');
+const soundTip = document.getElementById('soundTip');
 
 let pin = "";
 let isUnlocked = false;
@@ -244,11 +301,14 @@ function playChannel(id, el) {
     el.classList.add('active');
     loader.style.display = 'flex';
     document.getElementById('adBreaker').style.display = 'block';
+    soundTip.style.display = 'block';
     
-    // إجبار البث على العمل بالصوت فور التحميل
-    player.src = "https://dlhd.st/embed/stream-" + id + ".php?autoplay=true&mute=false";
+    player.src = "https://dlhd.st/embed/stream-" + id + ".php";
     
-    setTimeout(() => { loader.style.display = 'none'; }, 1500);
+    setTimeout(() => { 
+        loader.style.display = 'none';
+        setTimeout(() => { soundTip.style.display = 'none'; }, 6000);
+    }, 1500);
 }
 
 function doSearch() {
