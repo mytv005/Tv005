@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KiKON-tv</title>
+    <title>KiKON-tv+</title>
     <style>
         :root {
             --bg: #020617;
@@ -22,18 +22,22 @@
         .header { background: var(--sidebar); padding: 8px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #334155; flex-shrink: 0; height: 55px; }
         .search-bar { flex: 1; background: #1e293b; border: 1px solid #475569; color: white; padding: 10px; border-radius: 8px; outline: none; font-size: 1rem; }
         
-        .player-area { position: relative; width: 100%; background: #000; flex: 0 0 55vh; border-bottom: 3px solid var(--primary); overflow: hidden; }
+        /* منطقة المشغل */
+        .player-area { position: relative; width: 100%; background: #000; flex: 0 0 55vh; border-bottom: 3px solid var(--primary); overflow: hidden; transition: all 0.3s ease; }
+        body.cinema-mode .player-area { flex: 1 !important; border-bottom: none; }
+        body.cinema-mode .main-ui, body.cinema-mode .header { display: none !important; }
+
         iframe { width: 100%; height: 100%; border: none; z-index: 1; }
 
-        /* 🛡️ درع الحماية المعدل لابتلاع الإشعار والصورة بالكامل */
+        /* 🛡️ درع الحماية العلوية */
         .kikon-shield {
             position: absolute;
             top: 0;
             right: 0;
-            width: 320px; /* توسيع العرض لإخفاء الفقرة الزرقاء والصورة تماماً */
-            height: 95px;  /* زيادة الارتفاع لمنع ظهور أي جزء من الإعلان */
-            background: #020617; /* لون غامق يحجب ما تحته تماماً */
-            z-index: 150; /* درجة أولوية قصوى فوق المشغل والإعلانات */
+            width: 320px;
+            height: 95px;
+            background: #020617;
+            z-index: 150;
             display: flex; 
             align-items: center; 
             justify-content: center;
@@ -42,17 +46,40 @@
             font-size: 1.3rem;
             border-bottom-left-radius: 20px; 
             border: 1px solid rgba(255,255,255,0.1);
-            pointer-events: auto; /* يمنع الضغط على أي عنصر خلفه */
+            pointer-events: auto;
             box-shadow: -5px 5px 25px rgba(0,0,0,0.9);
         }
 
-        /* قناع حجب الإعلانات يغطي 85% ويترك شريط الصوت والتحكم السفلي */
+        /* 🎛️ شريط أدوات التحكم في المشغل (السينما والتحديث) */
+        .player-tools {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 160;
+            display: flex;
+            gap: 8px;
+        }
+
+        .tool-btn {
+            background: rgba(15, 23, 42, 0.85);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+        }
+        .tool-btn:active { transform: scale(0.95); background: var(--primary); }
+
+        /* قناع منع الإعلانات المنتصفية */
         #adBreaker { 
             position: absolute; 
             top: 0; 
             left: 0; 
             width: 100%; 
-            height: 85%; 
+            height: 80%; 
             z-index: 100; 
             background: rgba(0,0,0,0.01); 
             cursor: pointer; 
@@ -87,13 +114,14 @@
         .sidebar { width: 170px; background: var(--sidebar); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; }
         #regSide { flex: 1; overflow-y: auto; }
 
+        /* 🔒 زر القفل السري المصغر */
         .secret-box-btn { 
             width: 100%;
-            height: 45px;
-            background: #0b1120; 
+            height: 35px;
+            background: var(--sidebar);
             cursor: pointer; 
             border: none; 
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             flex-shrink: 0; 
             display: flex;
             align-items: center;
@@ -102,20 +130,16 @@
         }
 
         .secret-square {
-            width: 8px;
-            height: 8px;
-            background: #1e293b;
-            border-radius: 2px;
+            width: 5px;
+            height: 5px;
+            background: #1e293b; 
+            border-radius: 50%;
             transition: all 0.3s;
         }
 
         .secret-box-btn:hover .secret-square { background: #334155; }
-        .secret-box-btn.active { background: #1e293b; }
-        
-        .secret-box-btn.unlocked .secret-square { 
-            background: var(--doc); 
-            box-shadow: 0 0 8px var(--doc); 
-        }
+        .secret-box-btn.active { background: var(--sidebar); }
+        .secret-box-btn.unlocked .secret-square { background: var(--doc); box-shadow: 0 0 6px var(--doc); }
 
         .group-btn { width: 100%; padding: 18px 12px; background: transparent; border: none; color: #94a3b8; text-align: right; cursor: pointer; font-weight: bold; border-bottom: 1px solid #334155; font-size: 0.85rem; }
         .group-btn.active { background: var(--primary); color: white; border-right: 5px solid var(--accent); }
@@ -143,7 +167,6 @@
         #loader { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:900; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* تحسين الاستجابة للهواتف المحمولة */
         @media (max-width: 600px) { 
             .sidebar { width: 110px; } 
             .grid { grid-template-columns: repeat(3, 1fr); } 
@@ -151,7 +174,6 @@
             .kikon-shield { width: 250px; height: 75px; font-size: 1rem; } 
         }
 
-        /* تحسين الاستجابة للشاشات الكبيرة والتلفاز */
         @media (min-width: 1024px) {
             .player-area { flex: 0 0 60vh; }
             .ch-card { font-size: 0.9rem; min-height: 65px; }
@@ -168,7 +190,15 @@
 
 <div class="player-area">
     <div id="loader"><div style="border:3px solid #fff; border-top:3px solid var(--primary); border-radius:50%; width:30px; height:30px; animation: spin 1s linear infinite;"></div></div>
+    
+    <!-- درع الحماية + أدوات المشغل السريعة -->
     <div class="kikon-shield">KiKON-tv</div>
+    
+    <div class="player-tools">
+        <button class="tool-btn" onclick="toggleCinema()" title="وضع السينما">🎬 سينما</button>
+        <button class="tool-btn" onclick="refreshStream()" title="تحديث البث">🔄 تحديث</button>
+    </div>
+
     <div id="soundTip">🔊 اضغط على أيقونة الصوت بالأسفل</div>
     <div id="adBreaker" onclick="this.style.display='none'"></div>
     <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer"></iframe>
@@ -233,6 +263,7 @@ const soundTip = document.getElementById('soundTip');
 let pin = "";
 let isUnlocked = false;
 let currentCat = "🟣 beIN Sports";
+let currentStreamId = null;
 
 function init() {
     Object.keys(allData).forEach((cat) => {
@@ -274,7 +305,7 @@ function openSecret() {
 function press(n) {
     pin += n;
     pinDots.innerText = "*".repeat(pin.length) + "-".repeat(4 - pin.length);
-    if(pin === "0000") {
+    if(pin === "1986") {
         isUnlocked = true;
         secretBtn.classList.add('unlocked');
         keypad.style.display = 'none';
@@ -298,7 +329,9 @@ function renderGrid(list) {
 
 function playChannel(id, el) {
     document.querySelectorAll('.ch-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+    if(el) el.classList.add('active');
+    
+    currentStreamId = id;
     loader.style.display = 'flex';
     document.getElementById('adBreaker').style.display = 'block';
     soundTip.style.display = 'block';
@@ -309,6 +342,18 @@ function playChannel(id, el) {
         loader.style.display = 'none';
         setTimeout(() => { soundTip.style.display = 'none'; }, 6000);
     }, 1500);
+}
+
+/* 🎬 تفعيل/إلغاء وضع السينما */
+function toggleCinema() {
+    document.body.classList.toggle('cinema-mode');
+}
+
+/* 🔄 إعادة تحديث القناة الحالية بضغطة واحدة */
+function refreshStream() {
+    if(currentStreamId) {
+        playChannel(currentStreamId, null);
+    }
 }
 
 function doSearch() {
