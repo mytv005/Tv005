@@ -20,17 +20,14 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* 🎨 الهيدر وشريط البحث */
         .header { background: linear-gradient(90deg, var(--sidebar), #1e293b); padding: 8px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #334155; flex-shrink: 0; height: 55px; }
         body.fullscreen .header { display: none !important; }
 
         .search-bar { flex: 1; background: #1e293b; border: 1px solid #475569; color: white; padding: 10px; border-radius: 8px; outline: none; font-size: 1rem; transition: all 0.3s ease; }
         .search-bar:focus { border-color: var(--primary); box-shadow: 0 0 12px rgba(37, 99, 235, 0.4); background: #0f172a; }
         
-        /* 📺 منطقة المشغل */
         .player-area { position: relative; width: 100%; background: #000; flex: 0 0 55vh; border-bottom: 3px solid var(--primary); overflow: hidden; transition: all 0.3s ease; }
         
-        /* وضع السينما وملء الشاشة */
         body.cinema-mode .player-area { flex: 1 !important; border-bottom: none; }
         body.cinema-mode .main-ui, body.cinema-mode .header { display: none !important; }
 
@@ -39,7 +36,6 @@
 
         iframe { width: 100%; height: 100%; border: none; z-index: 1; }
 
-        /* 🛡️ درع الحماية العلوية */
         .kikon-shield {
             position: absolute; top: 0; right: 0; width: 320px; height: 95px; 
             background: linear-gradient(135deg, #020617, #1e293b); z-index: 150;
@@ -47,7 +43,6 @@
             border-bottom-left-radius: 20px; border: 1px solid rgba(255,255,255,0.1); pointer-events: auto; box-shadow: -5px 5px 25px rgba(0,0,0,0.9);
         }
 
-        /* 🎛️ شريط أدوات التحكم المتطور */
         .player-tools { position: absolute; top: 10px; left: 10px; z-index: 160; display: flex; gap: 6px; flex-wrap: wrap; }
         .tool-btn {
             background: rgba(15, 23, 42, 0.85); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px;
@@ -56,21 +51,31 @@
         .tool-btn:hover { background: var(--primary); border-color: var(--accent); transform: translateY(-2px); }
         .tool-btn:active { transform: scale(0.95); }
 
-        #adBreaker { position: absolute; top: 0; left: 0; width: 100%; height: 80%; z-index: 100; background: rgba(0,0,0,0.01); cursor: pointer; display: none; }
+        /* قناع الحجب المخصص يترك المساحة السفلية لزر الصوت */
+        #adBreaker { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 80%; 
+            z-index: 100; 
+            background: rgba(0,0,0,0.01); 
+            cursor: pointer; 
+            display: none; 
+        }
 
         #soundTip {
             position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.85);
-            color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; z-index: 90;
+            color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; z-index: 160;
             pointer-events: none; border: 1px solid var(--accent); display: none; animation: pulse 2s infinite;
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.3; } }
+        @keyframes pulse { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.4; } }
 
         .main-ui { flex: 1; display: flex; overflow: hidden; }
         .sidebar { width: 170px; background: var(--sidebar); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; }
         #regSide { flex: 1; overflow-y: auto; }
 
-        /* 🔒 زر القفل السري المصغر */
         .secret-box-btn { 
             width: 100%; height: 35px; background: var(--sidebar); cursor: pointer; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s;
@@ -87,7 +92,6 @@
         .grid-container { flex: 1; height: 100%; overflow-y: auto; padding: 10px; position: relative; background: var(--bg); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; padding-bottom: 40px; }
         
-        /* 📱 كروت القنوات */
         .ch-card { 
             background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: 1px solid #334155; padding: 10px 5px; border-radius: 12px; 
             cursor: pointer; font-size: 0.75rem; font-weight: bold; text-align: center; min-height: 55px; 
@@ -117,7 +121,7 @@
         }
     </style>
 </head>
-<body>
+<body onclick="enableGlobalAudio()">
 
 <div class="header">
     <div style="color:var(--accent); font-weight:900;">KiKON-tv</div>
@@ -129,7 +133,6 @@
     
     <div class="kikon-shield">KiKON-tv</div>
     
-    <!-- 🎛️ أزرار التحكم -->
     <div class="player-tools">
         <button class="tool-btn" onclick="prevChannel()" title="القناة السابقة">⏮️ السابقة</button>
         <button class="tool-btn" onclick="nextChannel()" title="القناة التالية">⏭️ التالية</button>
@@ -139,7 +142,7 @@
     </div>
 
     <div id="soundTip">🔊 اضغط على أيقونة الصوت بالأسفل</div>
-    <div id="adBreaker" onclick="this.style.display='none'"></div>
+    <div id="adBreaker" onclick="handleAdClick()"></div>
     <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer"></iframe>
 </div>
 
@@ -204,7 +207,8 @@ let isUnlocked = false;
 let currentCat = "🟣 beIN Sports";
 let currentStreamId = null;
 let currentChannelIndex = -1;
-let isClickLocked = false; // 🔒 متغير حماية الضغط المزدوج
+let isClickLocked = false;
+let soundTipTimer = null;
 
 function init() {
     Object.keys(allData).forEach((cat) => {
@@ -269,7 +273,6 @@ function renderGrid(list) {
 }
 
 function playChannel(id, el, index) {
-    // 🛡️ حماية الضغط المزدوج
     if (isClickLocked) return;
     isClickLocked = true;
     setTimeout(() => { isClickLocked = false; }, 1200);
@@ -282,14 +285,34 @@ function playChannel(id, el, index) {
 
     loader.style.display = 'flex';
     document.getElementById('adBreaker').style.display = 'block';
+    
+    if (soundTipTimer) clearTimeout(soundTipTimer);
     soundTip.style.display = 'block';
+    soundTipTimer = setTimeout(() => {
+        soundTip.style.display = 'none';
+    }, 6000);
     
     player.src = "https://dlhd.st/embed/stream-" + id + ".php";
     
     setTimeout(() => { 
         loader.style.display = 'none';
-        setTimeout(() => { soundTip.style.display = 'none'; }, 5000);
+        enableGlobalAudio();
     }, 1500);
+}
+
+// 🔊 حل دائم لتفعيل الصوت وتفادي حظر المتصفحات
+function enableGlobalAudio() {
+    if (player && player.contentWindow) {
+        try {
+            player.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+            player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        } catch(e) {}
+    }
+}
+
+function handleAdClick() {
+    document.getElementById('adBreaker').style.display = 'none';
+    enableGlobalAudio();
 }
 
 function nextChannel() {
