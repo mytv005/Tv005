@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KiKON-tv ULTRA V65 | Fixed Audio</title>
+    <title>KiKON-tv ULTRA V63 | The Global Archive</title>
     <style>
         :root {
             --bg: #020617;
@@ -15,146 +15,144 @@
             --accent: #facc15;
             --text: #f8fafc;
             --danger: #ef4444;
-            --highlight: #059669;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .header { background: linear-gradient(90deg, var(--sidebar), #1e293b); padding: 8px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #334155; flex-shrink: 0; height: 55px; }
-        body.fullscreen .header { display: none !important; }
-
-        .search-bar { flex: 1; background: #1e293b; border: 1px solid #475569; color: white; padding: 10px; border-radius: 8px; outline: none; font-size: 1rem; transition: all 0.3s ease; }
-        .search-bar:focus { border-color: var(--primary); box-shadow: 0 0 12px rgba(37, 99, 235, 0.4); background: #0f172a; }
+        .header { background: var(--sidebar); padding: 8px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #334155; flex-shrink: 0; height: 55px; }
+        .search-bar { flex: 1; background: #1e293b; border: 1px solid #475569; color: white; padding: 10px; border-radius: 8px; outline: none; font-size: 1rem; }
         
-        .player-area { position: relative; width: 100%; background: #000; flex: 0 0 55vh; border-bottom: 3px solid var(--primary); overflow: hidden; transition: all 0.3s ease; }
+        .player-area { position: relative; width: 100%; background: #000; flex: 0 0 50vh; border-bottom: 3px solid var(--primary); overflow: hidden; transition: flex 0.3s ease; }
+        .player-area.cinema-mode { flex: 0 0 85vh; z-index: 50; }
         
-        body.cinema-mode .player-area { flex: 1 !important; border-bottom: none; }
-        body.cinema-mode .main-ui, body.cinema-mode .header { display: none !important; }
+        /* ضبط الـ iframe ليترك مساحة لشريط التحكم السفلي */
+        iframe { width: 100%; height: calc(100% - 45px); border: none; z-index: 1; }
 
-        body.fullscreen .player-area { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; flex: 1 !important; border: none; z-index: 9999; }
-        body.fullscreen .main-ui, body.fullscreen .header { display: none !important; }
-
-        iframe { width: 100%; height: 100%; border: none; z-index: 1; }
-
-        /* شعار الدرع - غير قابل للاعتراض بصرياً وقدرة اللمس ملغاة منه لعدم تعطيل الفيديو */
         .kikon-shield {
-            position: absolute; top: 0; right: 0; width: 320px; height: 95px; 
-            background: linear-gradient(135deg, #020617, #1e293b); z-index: 150;
-            display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 900; font-size: 1.3rem;
-            border-bottom-left-radius: 20px; border: 1px solid rgba(255,255,255,0.1); 
-            pointer-events: none; /* 👈 يمنع الدرع من حظر النقرات */
+            position: absolute;
+            top: 0; right: 0;
+            width: 320px; height: 95px;
+            background: #020617;
+            z-index: 150;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent); font-weight: 900; font-size: 1.3rem;
+            border-bottom-left-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: none; 
             box-shadow: -5px 5px 25px rgba(0,0,0,0.9);
         }
 
-        .player-tools { position: absolute; top: 10px; left: 10px; z-index: 200; display: flex; gap: 6px; flex-wrap: wrap; }
-        .tool-btn {
-            background: rgba(15, 23, 42, 0.85); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px;
-            border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.2s;
-        }
-        .tool-btn:hover { background: var(--primary); border-color: var(--accent); transform: translateY(-2px); }
-        .tool-btn:active { transform: scale(0.95); }
-
-        /* 🔥 الإصلاح الجوهري هنا: قص منطقة اللمس السفلية بنسبة 15% للسماح بالضغط على زر الصوت بدون أي عائق */
+        /* تقليل ارتفاع الجدار الحامي لإتاحة اللمس في أسفل المشغل الأصلي */
         #adBreaker { 
             position: absolute; 
-            top: 0; 
-            left: 0; 
+            top: 0; left: 0; 
             width: 100%; 
-            height: 100%; 
+            height: 65%; /* تقليل الارتفاع للسماح بالوصول لعناصر التحكم باللمس */
             z-index: 100; 
             background: rgba(0,0,0,0.01); 
             cursor: pointer; 
-            display: none;
-            clip-path: inset(0 0 15% 0); /* 👈 يلغي تفاعل القناع تماماً في الـ 15% السفلية */
+            display: none; 
         }
 
-        #soundTip {
-            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.85);
-            color: var(--accent); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; z-index: 160;
-            pointer-events: none; border: 1px solid var(--accent); display: none; animation: pulse 2s infinite;
+        /* شريط تحكم الفيديو السفلي */
+        .player-controls {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            height: 45px;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 160;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            border-top: 1px solid #334155;
+            overflow-x: auto;
         }
 
-        @keyframes pulse { 0%, 100% { opacity: 0.9; } 50% { opacity: 0.4; } }
+        .control-group { display: flex; align-items: center; gap: 6px; }
+        .ctrl-btn {
+            background: #1e293b;
+            color: var(--text);
+            border: 1px solid #475569;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: flex; align-items: center; gap: 4px;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .ctrl-btn:hover, .ctrl-btn:focus { background: var(--primary); border-color: var(--accent); outline: none; }
 
         .main-ui { flex: 1; display: flex; overflow: hidden; }
-        .sidebar { width: 170px; background: var(--sidebar); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; }
+        .sidebar { width: 180px; background: var(--sidebar); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; }
         #regSide { flex: 1; overflow-y: auto; }
 
-        .secret-box-btn { 
-            width: 100%; height: 35px; background: var(--sidebar); cursor: pointer; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.3s;
-        }
-        .secret-square { width: 6px; height: 6px; background: #1e293b; border-radius: 50%; transition: all 0.3s; }
-        .secret-box-btn:hover .secret-square { background: #334155; }
+        .secret-box-btn { width: 100%; height: 8px; background: var(--sidebar); cursor: pointer; border: none; flex-shrink: 0; order: -2; padding: 2px 0; }
+        .secret-square { width: 10px; height: 10px; background: #1e293b; border-radius: 2px; margin: auto; transition: 0.3s; }
         .secret-box-btn.unlocked .secret-square { background: var(--doc); box-shadow: 0 0 8px var(--doc); }
 
-        .group-btn { width: 100%; padding: 18px 12px; background: transparent; border: none; color: #94a3b8; text-align: right; cursor: pointer; font-weight: bold; border-bottom: 1px solid #334155; font-size: 0.85rem; transition: background 0.2s; }
-        .group-btn.active { background: var(--primary); color: white; border-right: 5px solid var(--accent); }
+        .group-btn { width: 100%; padding: 16px 12px; background: transparent; border: none; color: #94a3b8; text-align: right; cursor: pointer; font-weight: bold; border-bottom: 1px solid #334155; font-size: 0.8rem; }
+        .group-btn.active, .group-btn:focus { background: var(--primary); color: white; border-right: 5px solid var(--accent); outline: none; }
         .group-btn.bein-p { background: var(--bein); color: white; }
         .group-btn.ara-g { background: var(--arabic); color: white; }
 
         .grid-container { flex: 1; height: 100%; overflow-y: auto; padding: 10px; position: relative; background: var(--bg); }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; padding-bottom: 40px; }
         
-        .ch-card { 
-            background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: 1px solid #334155; padding: 10px 5px; border-radius: 12px; 
-            cursor: pointer; font-size: 0.75rem; font-weight: bold; text-align: center; min-height: 55px; 
-            display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
-        }
-        .ch-card:hover { background: linear-gradient(135deg, #2563eb, #1e40af); border-color: var(--accent); transform: translateY(-2px); }
-        .ch-card.active { background: var(--highlight); border-color: white; box-shadow: 0 0 10px rgba(5, 150, 105, 0.5); }
+        .ch-card { background: #1e293b; color: white; border: 1px solid #334155; padding: 10px 5px; border-radius: 12px; cursor: pointer; font-size: 0.75rem; font-weight: bold; text-align: center; min-height: 55px; display: flex; align-items: center; justify-content: center; }
+        .ch-card:hover, .ch-card:focus { border-color: var(--accent); background: #334155; outline: none; }
+        .ch-card.active { background: #059669; border-color: white; }
 
         #keypadLock {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 200; display: none;
             flex-direction: column; align-items: center; justify-content: center;
         }
         .pin-display { font-size: 2.5rem; letter-spacing: 15px; margin-bottom: 20px; color: var(--accent); font-weight: bold; }
         .key-row { display: flex; gap: 15px; margin-bottom: 15px; }
-        .key { width: 65px; height: 60px; background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; color: white; user-select: none; transition: transform 0.1s; }
+        .key { width: 65px; height: 60px; background: #1e293b; border: 2px solid var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; cursor: pointer; color: white; user-select: none; transition: transform 0.1s; }
         .key:active { background: var(--primary); transform: scale(0.92); }
         .key.clear-btn { border-color: var(--danger); color: var(--danger); }
 
-        #loader { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:900; }
+        #loader { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:900; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 600px) { 
-            .sidebar { width: 110px; } 
-            .grid { grid-template-columns: repeat(3, 1fr); } 
-            .player-area { flex: 0 0 38vh; } 
-            .kikon-shield { width: 250px; height: 75px; font-size: 1rem; } 
-        }
+        @media (max-width: 600px) { .sidebar { width: 110px; } .grid { grid-template-columns: repeat(3, 1fr); } .player-area { flex: 0 0 35vh; } .kikon-shield { width: 220px; height: 65px; font-size: 1rem; } }
     </style>
 </head>
-<body onclick="enableGlobalAudio()">
+<body>
 
 <div class="header">
     <div style="color:var(--accent); font-weight:900;">KiKON-tv</div>
-    <input type="text" id="searchBox" class="search-bar" placeholder="بحث في القنوات..." oninput="doSearch()">
+    <input type="text" id="searchBox" class="search-bar" placeholder="بحث في 400+ قناة..." oninput="doSearch()">
 </div>
 
-<div class="player-area">
+<div class="player-area" id="playerContainer">
     <div id="loader"><div style="border:3px solid #fff; border-top:3px solid var(--primary); border-radius:50%; width:30px; height:30px; animation: spin 1s linear infinite;"></div></div>
-    
     <div class="kikon-shield">KiKON-tv</div>
+    <div id="adBreaker" onclick="this.style.display='none'"></div>
+    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" referrerpolicy="no-referrer"></iframe>
     
-    <div class="player-tools">
-        <button class="tool-btn" onclick="prevChannel()" title="القناة السابقة">⏮️ السابقة</button>
-        <button class="tool-btn" onclick="nextChannel()" title="القناة التالية">⏭️ التالية</button>
-        <button class="tool-btn" onclick="toggleCinema()" title="وضع السينما">🎬 سينما</button>
-        <button class="tool-btn" onclick="toggleFullScreen()" title="ملء الشاشة">🖥️ الشاشة كاملة</button>
-        <button class="tool-btn" onclick="refreshStream()" title="تحديث البث">🔄 تحديث</button>
+    <!-- شريط تحكم المشغل السفلي المعدل -->
+    <div class="player-controls">
+        <div class="control-group">
+            <button class="ctrl-btn" onclick="prevChannel()">⏮️ السابق</button>
+            <button class="ctrl-btn" id="playPauseBtn" onclick="togglePlayPause()">⏸️ إيقاف</button>
+            <button class="ctrl-btn" onclick="reloadChannel()">🔄 تحديث</button>
+            <button class="ctrl-btn" onclick="nextChannel()">⏭️ التالي</button>
+        </div>
+        <div class="control-group">
+            <button class="ctrl-btn" onclick="toggleCinemaMode()">🎬 سينما</button>
+            <button class="ctrl-btn" onclick="toggleFullScreen()">⛶ تكبير</button>
+        </div>
     </div>
-
-    <div id="soundTip">🔊 اضغط على أيقونة الصوت بالأسفل</div>
-    <div id="adBreaker" onclick="handleAdClick()"></div>
-    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms" referrerpolicy="no-referrer"></iframe>
 </div>
 
 <div class="main-ui">
     <div class="sidebar" id="side">
-        <button id="secretLock" class="secret-box-btn" onclick="openSecret()">
-            <div class="secret-square"></div>
-        </button>
+        <button id="secretLock" class="secret-box-btn" onclick="openSecret()"><div class="secret-square"></div></button>
         <div id="regSide"></div>
     </div>
     <div class="grid-container">
@@ -179,179 +177,212 @@
 </div>
 
 <script>
+const SECRET_PIN = "1986";
+
 const allData = {
     "🟣 beIN Sports": [
-        {name:"beIN 1",id:91},{name:"beIN 2",id:92},{name:"beIN 3",id:93},{name:"beIN 4",id:94},{name:"beIN 5",id:95},{name:"beIN 6",id:96},{name:"beIN 7",id:97},{name:"beIN 8",id:98},{name:"beIN 9",id:99},{name:"beIN Eng 1",id:61},{name:"beIN Eng 2",id:90},{name:"beIN XTRA 1",id:100},{name:"beIN Qatar",id:578},{name:"beIN MAX AR",id:597}
+        {name:"beIN 1",id:91},{name:"beIN 2",id:92},{name:"beIN 3",id:93},{name:"beIN 4",id:94},{name:"beIN 5",id:95},{name:"beIN 6",id:96},{name:"beIN 7",id:97},{name:"beIN 8",id:98},{name:"beIN 9",id:99},{name:"beIN Eng 1",id:61},{name:"beIN Eng 2",id:90},{name:"beIN XTRA",id:100},{name:"beIN MAX",id:597},{name:"beIN HD Qatar",id:578}
     ],
     "🟢 Arabic & SSC": [
-        {name:"Alkass 1",id:781},{name:"Alkass 2",id:782},{name:"Alkass 3",id:783},{name:"Alkass 4",id:784},{name:"AD Sp 1",id:600},{name:"AD Sp 2",id:601},{name:"AD Prem 1",id:609},{name:"AD Prem 2",id:610},{name:"Dubai 1",id:604},{name:"Dubai 2",id:605},{name:"Dubai 3",id:606},{name:"Dubai Racing",id:608},{name:"OnTime Sp",id:611},{name:"CricLife",id:284},{name:"SSC 1",id:614},{name:"SSC 2",id:615},{name:"SSC 3",id:616},{name:"SSC 4",id:617},{name:"SSC 5",id:618},{name:"SSC EX 1",id:619},{name:"SSC EX 2",id:620},{name:"SSC EX 3",id:621}
+        {name:"SSC 1",id:614},{name:"SSC 2",id:615},{name:"SSC 3",id:616},{name:"SSC 4",id:617},{name:"SSC 5",id:618},{name:"SSC EX 1",id:619},{name:"SSC EX 2",id:620},{name:"AD Sp 1",id:600},{name:"AD Prem 1",id:609},{name:"AD Prem 2",id:610},{name:"Alkass 1",id:781},{name:"Dubai 1",id:604},{name:"OnTime Sp",id:611},{name:"CricLife",id:284}
     ],
-    "🇺🇸 Sports": [
-        {name:"ESPN",id:44},{name:"ESPN2",id:45},{name:"ESPNU",id:316},{name:"ESPNews",id:288},{name:"NBC USA",id:53},{name:"NFL Net",id:405},{name:"NBA TV",id:404},{name:"MLB Net",id:399},{name:"NHL Net",id:663},{name:"NFL RedZone",id:667},{name:"TSN 1",id:111},{name:"TSN 2",id:112},{name:"TSN 3",id:113},{name:"TSN 4",id:114},{name:"TSN 5",id:115},{name:"TUDN",id:66},{name:"Telemundo",id:131},{name:"TVA Sp",id:833},{name:"TVA Sp 2",id:834},{name:"Univision",id:132},{name:"Unimas",id:133},{name:"Tennis Ch",id:40},{name:"Outdoor Ch",id:848},{name:"Citytv",id:831},{name:"CBC CA",id:832},{name:"RDS",id:839},{name:"RDS 2",id:840},{name:"RDS Info",id:841},{name:"ACC Net",id:664},{name:"Altitude",id:923},{name:"BIG TEN",id:397},{name:"CBSSN",id:308},{name:"Chicago Sp",id:776},{name:"MSG USA",id:765},{name:"Marquee",id:770},{name:"MASN USA",id:829},{name:"Monumental",id:778},{name:"NESN USA",id:762},{name:"Root Sp",id:920},{name:"SNY NY",id:759},{name:"Spectrum",id:982},{name:"SEC Net",id:385},{name:"SN ON",id:406},{name:"SN One",id:411},{name:"SN West",id:407},{name:"SN East",id:408},{name:"SN 360",id:409},{name:"SN World",id:410}
+    "🇬🇧 UK Sports": [
+        {name:"TNT Sport 1",id:31},{name:"TNT Sport 2",id:32},{name:"TNT Sport 3",id:33},{name:"Sky Premier",id:130},{name:"Sky Football",id:35},{name:"Sky Action",id:37},{name:"Sky Tennis",id:46},{name:"Sky F1",id:60},{name:"Sky Golf",id:70},{name:"DAZN 1 UK",id:230}
     ],
-    "🇺🇸 General": [
-        {name:"ABC USA",id:51},{name:"AHC",id:206},{name:"Antenna",id:283},{name:"A&E",id:302},{name:"AMC",id:303},{name:"Animal Plan",id:304},{name:"Kids TV",id:295},{name:"AXS TV",id:742},{name:"ABC NY",id:766},{name:"BB America",id:305},{name:"BET USA",id:306},{name:"Bravo USA",id:307},{name:"CW PIX 11",id:280},{name:"CBS USA",id:52},{name:"Court TV",id:281},{name:"CW USA",id:300},{name:"CNBC USA",id:309},{name:"Comedy Cent",id:310},{name:"Cartoon Net",id:339},{name:"CNN USA",id:345},{name:"Cinemax",id:374},{name:"COZI TV",id:748},{name:"CMT USA",id:647},{name:"CTV Canada",id:602},{name:"CTV 2 CA",id:838},{name:"Crime+",id:669},{name:"Comet USA",id:696},{name:"Cooking Ch",id:697},{name:"Cleo TV",id:715},{name:"C SPAN 1",id:750},{name:"CBSNY USA",id:767},{name:"Disc. Life",id:311},{name:"Disney Ch",id:312},{name:"Discovery",id:313},{name:"Disc. Family",id:657},{name:"Disney XD",id:314},{name:"Dest. Am",id:651},{name:"Disney JR",id:652},{name:"BB S28 C1",id:891},{name:"BB S28 C2",id:892},{name:"BB S28 C3",id:893},{name:"BB S28 C4",id:894},{name:"BB Quad",id:895},{name:"MSNBC",id:327},{name:"Magnolia",id:299},{name:"MTV USA",id:371},{name:"MY9TV USA",id:654},{name:"METV USA",id:662},{name:"MGM+ USA",id:791},{name:"NewsNation",id:292},{name:"Nat Geo",id:328},{name:"NICK JR",id:329},{name:"NICK",id:330},{name:"Nicktoons",id:649},{name:"Newsmax",id:613},{name:"Nat Geo Wild",id:745},{name:"Noovo CA",id:835},{name:"NBC Univ",id:845},{name:"OWN Channel",id:331},{name:"Oxygen Crime",id:332},{name:"Paramount",id:334},{name:"POP TV",id:653},{name:"PBS USA",id:210},{name:"Reelz Ch",id:293},{name:"Starz Cine",id:970},{name:"Starz Com",id:971},{name:"Starz Edge",id:972},{name:"Starz Black",id:973},{name:"Starz Kids",id:974},{name:"Starz Encore",id:975},{name:"Encore Act",id:976},{name:"Encore Black",id:977},{name:"Encore Class",id:978},{name:"Encore Fam",id:979},{name:"Encore Susp",id:980},{name:"Encore West",id:981},{name:"Hallmark",id:320},{name:"TBS USA",id:336},{name:"TLC Ch",id:337},{name:"TNT USA",id:338},{name:"Travel Ch",id:340},{name:"TruTV USA",id:341},{name:"TVLAND",id:342},{name:"TCM USA",id:644},{name:"TMC USA",id:698},{name:"Food Net",id:384},{name:"Weather Ch",id:394},{name:"TeenNick",id:650},{name:"TV ONE",id:660},{name:"TVO CA",id:842},{name:"USA Network",id:343},{name:"Univ Kids",id:668},{name:"VH1 USA",id:344},{name:"VICE TV",id:659},{name:"WETV USA",id:655}
+    "🇺🇸 US Sports": [
+        {name:"ESPN 1",id:44},{name:"ESPN 2",id:45},{name:"Fox Sports 1",id:39},{name:"NBC USA",id:53},{name:"NFL Net",id:405},{name:"NBA TV",id:404},{name:"MLB Net",id:399},{name:"NHL Net",id:663},{name:"Tennis Ch",id:40},{name:"WWE Net",id:376}
     ],
-    "SecretDocs": [ 
-        {name:"History 1",id:502},{name:"History 2",id:503},{name:"Discovery Ch",id:504},{name:"Investig.",id:505},{name:"Science Ch",id:506},{name:"Heroes Ch",id:507},{name:"Destination",id:508},{name:"Disc. Life",id:509},{name:"Disc. Fam",id:510},{name:"Nat Geo USA",id:511},{name:"Nat Geo Wild",id:512},{name:"Smithson",id:513},{name:"Animal Plan",id:514},{name:"Travel Ch",id:515},{name:"Food Net",id:516},{name:"HGTV USA",id:517},{name:"Magnolia Net",id:518},{name:"Cooking Ch",id:519},{name:"FYI Channel",id:520}
+    "🇪🇸 Spain Sports": [
+        {name:"Movistar LaLiga",id:84},{name:"Movistar UCL",id:435},{name:"DAZN LaLiga",id:538},{name:"Barca TV",id:522},{name:"Real Madrid TV",id:523},{name:"GOL PLAY",id:530}
+    ],
+    "🇫🇷 France Sports": [
+        {name:"Canal+ Sport",id:122},{name:"Canal+ Foot",id:463},{name:"beIN 1 FR",id:116},{name:"beIN 2 FR",id:117},{name:"RMC Sport 1",id:119},{name:"Eurosport 1 FR",id:772}
+    ],
+    "🇮🇹 Italy Sports": [
+        {name:"DAZN ZONA",id:877},{name:"Sky Sport UNO",id:461},{name:"Sky Sport F1",id:577},{name:"Rai Sport",id:882}
+    ],
+    "🇵🇹 Portugal Sports": [
+        {name:"Sport TV 1",id:49},{name:"Sport TV 2",id:74},{name:"Eleven 1",id:455},{name:"Eleven 2",id:456},{name:"Benfica TV",id:380}
+    ],
+    "🇵🇱 Poland Sports": [
+        {name:"Canal+ Sport PL",id:48},{name:"Polsat Sport 1",id:47},{name:"Polsat Premium 1",id:991},{name:"Eleven 1 PL",id:71}
+    ],
+    "🌍 Balkans Sports": [
+        {name:"Arena Prem 1",id:134},{name:"Arena Prem 2",id:135},{name:"Arena Serbia 1",id:429},{name:"Sport Klub 1",id:101}
+    ],
+    "🇨🇿 Czech Sports": [
+        {name:"Canal+ Sport CZ",id:1020},{name:"Nova Sport 1",id:1021},{name:"Premier Sport 1",id:1030}
+    ],
+    "🌎 South America": [
+        {name:"ESPN Premium AR",id:387},{name:"Fox Sports AR",id:787},{name:"SporTV 1 BR",id:78},{name:"ESPN 1 BR",id:81},{name:"Win Sports+ CO",id:392}
+    ],
+    "🇺🇸 USA General": [
+        {name:"ABC USA",id:51},{name:"CBS USA",id:52},{name:"AMC USA",id:303},{name:"A&E USA",id:302},{name:"HBO USA",id:321},{name:"Discovery",id:313},{name:"Kids TV",id:295},{name:"Disney Ch",id:312},{name:"Cartoon Net",id:339},{name:"TLC",id:337},{name:"CNN USA",id:345},{name:"MSNBC",id:327}
+    ],
+    "🌍 Documentary": [
+        {name:"History 1",id:502},{name:"History 2",id:503},{name:"Discovery Ch",id:504},{name:"Nat Geo USA",id:511},{name:"Nat Geo Wild",id:512},{name:"Animal Plan",id:514},{name:"FYI Channel",id:520}
+    ],
+    "🔒 Secret": [
+        {name:"18+ P-01",id:801},{name:"18+ P-02",id:802},{name:"18+ P-03",id:803},{name:"18+ P-04",id:804},{name:"18+ P-05",id:805},{name:"18+ P-06",id:806},{name:"18+ P-07",id:807},{name:"18+ P-08",id:808},{name:"18+ P-09",id:809},{name:"18+ P-10",id:810},{name:"18+ P-11",id:811},{name:"18+ P-12",id:812},{name:"18+ P-13",id:813},{name:"18+ P-14",id:814},{name:"18+ P-15",id:815},{name:"18+ P-16",id:816},{name:"18+ P-17",id:817},{name:"18+ P-18",id:818},{name:"18+ P-19",id:819},{name:"18+ P-20",id:820}
     ]
 };
 
 const regSide = document.getElementById('regSide');
 const grid = document.getElementById('grid');
 const player = document.getElementById('mainPlayer');
+const playerContainer = document.getElementById('playerContainer');
 const loader = document.getElementById('loader');
 const secretBtn = document.getElementById('secretLock');
 const keypad = document.getElementById('keypadLock');
 const pinDots = document.getElementById('pinDots');
-const soundTip = document.getElementById('soundTip');
+const playPauseBtn = document.getElementById('playPauseBtn');
 
 let pin = "";
 let isUnlocked = false;
 let currentCat = "🟣 beIN Sports";
-let currentStreamId = null;
+let savedSrc = "";
 let currentChannelIndex = -1;
-let isClickLocked = false;
-let soundTipTimer = null;
 
 function init() {
+    regSide.innerHTML = "";
     Object.keys(allData).forEach((cat) => {
-        if(cat === "SecretDocs") return;
+        if(cat === "🔒 Secret") return;
         const btn = document.createElement('button');
         btn.className = 'group-btn';
+        btn.tabIndex = 0;
         if(cat.includes('beIN')) btn.classList.add('bein-p');
         if(cat.includes('Arabic')) btn.classList.add('ara-g');
         btn.innerText = cat;
         btn.onclick = () => selectCat(cat, btn);
         regSide.appendChild(btn);
     });
-    regSide.firstChild.click();
+    if (regSide.firstChild) regSide.firstChild.click();
 }
 
 function selectCat(cat, btn) {
     document.querySelectorAll('.group-btn, .secret-box-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    if(btn) btn.classList.add('active');
     currentCat = cat;
-    keypad.style.display = 'none';
-    grid.style.display = 'grid';
+    keypad.style.display = 'none'; grid.style.display = 'grid';
     renderGrid(allData[cat]);
 }
 
 function openSecret() {
     document.querySelectorAll('.group-btn, .secret-box-btn').forEach(b => b.classList.remove('active'));
     secretBtn.classList.add('active');
-    currentCat = "SecretDocs";
+    currentCat = "🔒 Secret";
     if(!isUnlocked) {
-        grid.style.display = 'none';
-        keypad.style.display = 'flex';
-        cls();
+        grid.style.display = 'none'; keypad.style.display = 'flex'; cls();
     } else {
-        grid.style.display = 'grid';
-        renderGrid(allData["SecretDocs"]);
+        grid.style.display = 'grid'; renderGrid(allData["🔒 Secret"]);
     }
 }
 
+window.addEventListener('keydown', (e) => {
+    if (keypad.style.display === 'flex') {
+        if (e.key >= '0' && e.key <= '9') {
+            press(e.key);
+        } else if (e.key === 'Backspace' || e.key === 'c' || e.key === 'C') {
+            cls();
+        }
+    }
+});
+
 function press(n) {
-    pin += n;
-    pinDots.innerText = "*".repeat(pin.length) + "-".repeat(4 - pin.length);
-    if(pin === "1986") {
-        isUnlocked = true;
-        secretBtn.classList.add('unlocked');
-        keypad.style.display = 'none';
-        grid.style.display = 'grid';
-        renderGrid(allData["SecretDocs"]);
-    } else if (pin.length >= 4) { cls(); }
+    if(pin.length < 4) {
+        pin += n;
+        pinDots.innerText = "*".repeat(pin.length) + "-".repeat(4 - pin.length);
+    }
+    if(pin === SECRET_PIN) {
+        isUnlocked = true; secretBtn.classList.add('unlocked');
+        keypad.style.display = 'none'; grid.style.display = 'grid';
+        renderGrid(allData["🔒 Secret"]);
+    } else if (pin.length >= 4) { 
+        setTimeout(cls, 300);
+    }
 }
 
 function cls() { pin = ""; pinDots.innerText = "----"; }
 
 function renderGrid(list) {
     grid.innerHTML = "";
-    list.forEach((ch, index) => {
+    if(!list) return;
+    list.forEach((ch, idx) => {
         const div = document.createElement('div');
-        div.className = 'ch-card';
+        div.className = 'ch-card'; 
         div.innerText = ch.name;
-        div.onclick = () => playChannel(ch.id, div, index);
+        div.tabIndex = 0;
+        div.onclick = () => { currentChannelIndex = idx; playChannel(ch.id, div); };
+        div.onkeydown = (e) => { if(e.key === 'Enter') { currentChannelIndex = idx; playChannel(ch.id, div); } };
         grid.appendChild(div);
     });
 }
 
-function playChannel(id, el, index) {
-    if (isClickLocked) return;
-    isClickLocked = true;
-    setTimeout(() => { isClickLocked = false; }, 1200);
-
+function playChannel(id, el) {
     document.querySelectorAll('.ch-card').forEach(c => c.classList.remove('active'));
     if(el) el.classList.add('active');
-    
-    currentStreamId = id;
-    if(typeof index !== 'undefined') currentChannelIndex = index;
-
     loader.style.display = 'flex';
     document.getElementById('adBreaker').style.display = 'block';
-    
-    if (soundTipTimer) clearTimeout(soundTipTimer);
-    soundTip.style.display = 'block';
-    soundTipTimer = setTimeout(() => {
-        soundTip.style.display = 'none';
-    }, 6000);
-    
-    player.src = "https://dlhd.st/embed/stream-" + id + ".php";
-    
-    setTimeout(() => { 
-        loader.style.display = 'none';
-        enableGlobalAudio();
-    }, 1500);
+    savedSrc = "https://dlhd.st/embed/stream-" + id + ".php";
+    player.src = savedSrc;
+    playPauseBtn.innerText = "⏸️ إيقاف";
+    setTimeout(() => { loader.style.display = 'none'; }, 1200);
 }
 
-function enableGlobalAudio() {
-    if (player && player.contentWindow) {
-        try {
-            player.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-            player.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-        } catch(e) {}
+/* وظائف التحكم المعدلة بالكامل */
+function togglePlayPause() {
+    if (player.src !== "") {
+        savedSrc = player.src;
+        player.src = "";
+        playPauseBtn.innerText = "▶️ تشغيل";
+    } else if (savedSrc !== "") {
+        player.src = savedSrc;
+        playPauseBtn.innerText = "⏸️ إيقاف";
     }
 }
 
-function handleAdClick() {
-    document.getElementById('adBreaker').style.display = 'none';
-    enableGlobalAudio();
+function reloadChannel() {
+    if (savedSrc) {
+        loader.style.display = 'flex';
+        player.src = savedSrc;
+        playPauseBtn.innerText = "⏸️ إيقاف";
+        setTimeout(() => { loader.style.display = 'none'; }, 1000);
+    }
 }
 
 function nextChannel() {
-    const channelList = allData[currentCat];
-    if (!channelList || channelList.length === 0) return;
-    
-    currentChannelIndex = (currentChannelIndex + 1) % channelList.length;
-    const nextCh = channelList[currentChannelIndex];
-    const cards = document.querySelectorAll('.ch-card');
-    playChannel(nextCh.id, cards[currentChannelIndex] || null, currentChannelIndex);
+    const list = allData[currentCat];
+    if (!list || list.length === 0) return;
+    currentChannelIndex = (currentChannelIndex + 1) % list.length;
+    const cards = grid.children;
+    const targetCard = cards[currentChannelIndex];
+    playChannel(list[currentChannelIndex].id, targetCard);
 }
 
 function prevChannel() {
-    const channelList = allData[currentCat];
-    if (!channelList || channelList.length === 0) return;
-    
-    currentChannelIndex = (currentChannelIndex - 1 + channelList.length) % channelList.length;
-    const prevCh = channelList[currentChannelIndex];
-    const cards = document.querySelectorAll('.ch-card');
-    playChannel(prevCh.id, cards[currentChannelIndex] || null, currentChannelIndex);
+    const list = allData[currentCat];
+    if (!list || list.length === 0) return;
+    currentChannelIndex = (currentChannelIndex - 1 + list.length) % list.length;
+    const cards = grid.children;
+    const targetCard = cards[currentChannelIndex];
+    playChannel(list[currentChannelIndex].id, targetCard);
 }
 
-function toggleCinema() {
-    document.body.classList.remove('fullscreen');
-    document.body.classList.toggle('cinema-mode');
+function toggleCinemaMode() {
+    playerContainer.classList.toggle('cinema-mode');
 }
 
 function toggleFullScreen() {
-    document.body.classList.remove('cinema-mode');
-    document.body.classList.toggle('fullscreen');
-}
-
-function refreshStream() {
-    if(currentStreamId) {
-        isClickLocked = false;
-        playChannel(currentStreamId, null, currentChannelIndex);
+    if (!document.fullscreenElement) {
+        if (playerContainer.requestFullscreen) {
+            playerContainer.requestFullscreen();
+        } else if (playerContainer.webkitRequestFullscreen) {
+            playerContainer.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
     }
 }
 
@@ -359,19 +390,19 @@ function doSearch() {
     const q = document.getElementById('searchBox').value.toLowerCase().trim();
     if (q === "") {
         const activeBtn = document.querySelector('.group-btn.active') || secretBtn;
-        if(currentCat === "SecretDocs") openSecret(); else selectCat(currentCat, activeBtn);
+        if(currentCat === "🔒 Secret") openSecret(); else selectCat(currentCat, activeBtn);
         return;
     }
     keypad.style.display = 'none'; grid.style.display = 'grid';
     grid.innerHTML = "";
     Object.keys(allData).forEach(k => {
-        if (k === "SecretDocs" && !isUnlocked) return;
-        allData[k].forEach((ch, idx) => {
+        if(k === "🔒 Secret" && !isUnlocked) return;
+        allData[k].forEach(ch => {
             if(ch.name.toLowerCase().includes(q)) {
-                const div = document.createElement('div'); 
-                div.className = 'ch-card'; 
-                div.innerText = ch.name;
-                div.onclick = () => playChannel(ch.id, div, idx);
+                const div = document.createElement('div');
+                div.className = 'ch-card'; div.innerText = ch.name;
+                div.tabIndex = 0;
+                div.onclick = () => playChannel(ch.id, div);
                 grid.appendChild(div);
             }
         });
