@@ -3,15 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KiKON-tv ULTRA V63 | The Global Archive</title>
+    <title>KiKON-tv ULTRA V64 | Complete List Integration</title>
     <style>
         :root {
             --bg: #020617;
             --sidebar: #0f172a;
             --primary: #2563eb;
-            --bein: #7c3aed;
-            --arabic: #10b981;
-            --doc: #f59e0b;
+            --bein: linear-gradient(135deg, #4c1d95, #7c3aed);
+            --arabic: linear-gradient(135deg, #065f46, #10b981);
+            --uk: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            --us: linear-gradient(135deg, #991b1b, #ef4444);
+            --spain: linear-gradient(135deg, #9a3412, #f97316);
+            --france: linear-gradient(135deg, #1e40af, #60a5fa);
+            --italy: linear-gradient(135deg, #064e3b, #34d399);
+            --doc: linear-gradient(135deg, #b45309, #f59e0b);
+            --ent: linear-gradient(135deg, #374151, #4b5563);
+            --secret: linear-gradient(135deg, #831843, #ec4899);
             --accent: #facc15;
             --text: #f8fafc;
             --danger: #ef4444;
@@ -25,7 +32,6 @@
         .player-area { position: relative; width: 100%; background: #000; flex: 0 0 50vh; border-bottom: 3px solid var(--primary); overflow: hidden; transition: flex 0.3s ease; }
         .player-area.cinema-mode { flex: 0 0 85vh; z-index: 50; }
         
-        /* ضبط الـ iframe ليترك مساحة لشريط التحكم السفلي */
         iframe { width: 100%; height: calc(100% - 45px); border: none; z-index: 1; }
 
         .kikon-shield {
@@ -42,19 +48,17 @@
             box-shadow: -5px 5px 25px rgba(0,0,0,0.9);
         }
 
-        /* تقليل ارتفاع الجدار الحامي لإتاحة اللمس في أسفل المشغل الأصلي */
         #adBreaker { 
             position: absolute; 
             top: 0; left: 0; 
             width: 100%; 
-            height: 65%; /* تقليل الارتفاع للسماح بالوصول لعناصر التحكم باللمس */
+            height: 65%; 
             z-index: 100; 
             background: rgba(0,0,0,0.01); 
             cursor: pointer; 
             display: none; 
         }
 
-        /* شريط تحكم الفيديو السفلي */
         .player-controls {
             position: absolute;
             bottom: 0; left: 0; width: 100%;
@@ -81,29 +85,69 @@
             font-weight: bold;
             display: flex; align-items: center; gap: 4px;
             white-space: nowrap;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
-        .ctrl-btn:hover, .ctrl-btn:focus { background: var(--primary); border-color: var(--accent); outline: none; }
+        .ctrl-btn:hover, .ctrl-btn:focus { background: var(--primary); border-color: var(--accent); outline: none; transform: translateY(-1px); }
 
         .main-ui { flex: 1; display: flex; overflow: hidden; }
-        .sidebar { width: 180px; background: var(--sidebar); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; }
-        #regSide { flex: 1; overflow-y: auto; }
+        .sidebar { width: 190px; background: var(--sidebar); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; }
+        #regSide { flex: 1; overflow-y: auto; padding: 5px; display: flex; flex-direction: column; gap: 5px; }
 
-        .secret-box-btn { width: 100%; height: 8px; background: var(--sidebar); cursor: pointer; border: none; flex-shrink: 0; order: -2; padding: 2px 0; }
-        .secret-square { width: 10px; height: 10px; background: #1e293b; border-radius: 2px; margin: auto; transition: 0.3s; }
-        .secret-box-btn.unlocked .secret-square { background: var(--doc); box-shadow: 0 0 8px var(--doc); }
+        .secret-box-btn { width: 100%; height: 10px; background: var(--sidebar); cursor: pointer; border: none; flex-shrink: 0; order: -2; padding: 2px 0; }
+        .secret-square { width: 12px; height: 12px; background: #1e293b; border-radius: 2px; margin: auto; transition: 0.3s; }
+        .secret-box-btn.unlocked .secret-square { background: #ec4899; box-shadow: 0 0 8px #ec4899; }
 
-        .group-btn { width: 100%; padding: 16px 12px; background: transparent; border: none; color: #94a3b8; text-align: right; cursor: pointer; font-weight: bold; border-bottom: 1px solid #334155; font-size: 0.8rem; }
-        .group-btn.active, .group-btn:focus { background: var(--primary); color: white; border-right: 5px solid var(--accent); outline: none; }
-        .group-btn.bein-p { background: var(--bein); color: white; }
-        .group-btn.ara-g { background: var(--arabic); color: white; }
+        .group-btn { 
+            width: 100%; 
+            padding: 12px 10px; 
+            border: 1px solid rgba(255,255,255,0.08); 
+            border-radius: 8px;
+            color: #ffffff; 
+            text-align: right; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 0.8rem; 
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .group-btn:hover, .group-btn:focus, .group-btn.active {
+            filter: brightness(1.25);
+            border-right: 5px solid var(--accent);
+            outline: none;
+            transform: scale(0.98);
+        }
 
         .grid-container { flex: 1; height: 100%; overflow-y: auto; padding: 10px; position: relative; background: var(--bg); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; padding-bottom: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; padding-bottom: 40px; }
         
-        .ch-card { background: #1e293b; color: white; border: 1px solid #334155; padding: 10px 5px; border-radius: 12px; cursor: pointer; font-size: 0.75rem; font-weight: bold; text-align: center; min-height: 55px; display: flex; align-items: center; justify-content: center; }
-        .ch-card:hover, .ch-card:focus { border-color: var(--accent); background: #334155; outline: none; }
-        .ch-card.active { background: #059669; border-color: white; }
+        .ch-card { 
+            background: linear-gradient(145deg, #1e293b, #0f172a); 
+            color: white; 
+            border: 1px solid #334155; 
+            padding: 10px 5px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            text-align: center; 
+            min-height: 55px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .ch-card:hover, .ch-card:focus { 
+            border-color: var(--accent); 
+            background: linear-gradient(145deg, #334155, #1e293b); 
+            transform: translateY(-2px);
+            outline: none; 
+        }
+        .ch-card.active { 
+            background: linear-gradient(135deg, #059669, #10b981); 
+            border-color: #ffffff; 
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
 
         #keypadLock {
             position: absolute;
@@ -119,14 +163,14 @@
 
         #loader { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:900; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 600px) { .sidebar { width: 110px; } .grid { grid-template-columns: repeat(3, 1fr); } .player-area { flex: 0 0 35vh; } .kikon-shield { width: 220px; height: 65px; font-size: 1rem; } }
+        @media (max-width: 600px) { .sidebar { width: 120px; } .grid { grid-template-columns: repeat(3, 1fr); } .player-area { flex: 0 0 35vh; } .kikon-shield { width: 220px; height: 65px; font-size: 1rem; } }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div style="color:var(--accent); font-weight:900;">KiKON-tv</div>
-    <input type="text" id="searchBox" class="search-bar" placeholder="بحث في 400+ قناة..." oninput="doSearch()">
+    <input type="text" id="searchBox" class="search-bar" placeholder="بحث في القنوات..." oninput="doSearch()">
 </div>
 
 <div class="player-area" id="playerContainer">
@@ -135,7 +179,6 @@
     <div id="adBreaker" onclick="this.style.display='none'"></div>
     <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" referrerpolicy="no-referrer"></iframe>
     
-    <!-- شريط تحكم المشغل السفلي المعدل -->
     <div class="player-controls">
         <div class="control-group">
             <button class="ctrl-btn" onclick="prevChannel()">⏮️ السابق</button>
@@ -179,51 +222,64 @@
 <script>
 const SECRET_PIN = "1986";
 
+const categoryStyles = {
+    "🟣 beIN Sports": { bg: "var(--bein)" },
+    "🟢 Arabic & SSC": { bg: "var(--arabic)" },
+    "🇬🇧 UK Sports": { bg: "var(--uk)" },
+    "🇺🇸 US Sports": { bg: "var(--us)" },
+    "🇪🇸 Spain Sports": { bg: "var(--spain)" },
+    "🇫🇷 France Sports": { bg: "var(--france)" },
+    "🇮🇹 Italy Sports": { bg: "var(--italy)" },
+    "🇵🇹 Portugal Sports": { bg: "var(--uk)" },
+    "🇵🇱 Poland Sports": { bg: "var(--spain)" },
+    "🌍 Balkans Sports": { bg: "var(--arabic)" },
+    "🇨🇿 Czech & SK": { bg: "var(--france)" },
+    "🌍 Documentary": { bg: "var(--doc)" },
+    "📺 Entertainment": { bg: "var(--ent)" }
+};
+
 const allData = {
     "🟣 beIN Sports": [
-        {name:"beIN 1",id:91},{name:"beIN 2",id:92},{name:"beIN 3",id:93},{name:"beIN 4",id:94},{name:"beIN 5",id:95},{name:"beIN 6",id:96},{name:"beIN 7",id:97},{name:"beIN 8",id:98},{name:"beIN 9",id:99},{name:"beIN Eng 1",id:61},{name:"beIN Eng 2",id:90},{name:"beIN XTRA",id:100},{name:"beIN MAX",id:597},{name:"beIN HD Qatar",id:578}
+        {name:"beIN 1 Arabic",id:91},{name:"beIN 2 Arabic",id:92},{name:"beIN 3 Arabic",id:93},{name:"beIN 4 Arabic",id:94},{name:"beIN 5 Arabic",id:95},{name:"beIN 6 Arabic",id:96},{name:"beIN 7 Arabic",id:97},{name:"beIN 8 Arabic",id:98},{name:"beIN 9 Arabic",id:99},{name:"beIN Eng 1",id:61},{name:"beIN Eng 2",id:90},{name:"beIN XTRA 1",id:100},{name:"beIN MAX AR",id:597},{name:"beIN HD Qatar",id:578},{name:"beIN USA",id:425},{name:"beIN en Español",id:372},{name:"beIN Aus 1",id:491},{name:"beIN Aus 2",id:492},{name:"beIN Aus 3",id:493},{name:"beIN FR 1",id:116},{name:"beIN FR 2",id:117},{name:"beIN FR 3",id:118},{name:"beIN MAX 4 FR",id:494},{name:"beIN MAX 5 FR",id:495},{name:"beIN MAX 6 FR",id:496},{name:"beIN MAX 7 FR",id:497},{name:"beIN MAX 8 FR",id:498},{name:"beIN MAX 9 FR",id:499},{name:"beIN MAX 10 FR",id:500},{name:"beIN TR 1",id:62},{name:"beIN TR 2",id:63},{name:"beIN TR 3",id:64},{name:"beIN TR 4",id:67},{name:"beIN TR 5",id:1010},{name:"beIN MY 1",id:712},{name:"beIN MY 2",id:713},{name:"beIN MY 3",id:714}
     ],
     "🟢 Arabic & SSC": [
-        {name:"SSC 1",id:614},{name:"SSC 2",id:615},{name:"SSC 3",id:616},{name:"SSC 4",id:617},{name:"SSC 5",id:618},{name:"SSC EX 1",id:619},{name:"SSC EX 2",id:620},{name:"AD Sp 1",id:600},{name:"AD Prem 1",id:609},{name:"AD Prem 2",id:610},{name:"Alkass 1",id:781},{name:"Dubai 1",id:604},{name:"OnTime Sp",id:611},{name:"CricLife",id:284}
+        {name:"SSC Sport 1",id:614},{name:"SSC Sport 2",id:615},{name:"SSC Sport 3",id:616},{name:"SSC Sport 4",id:617},{name:"SSC Sport 5",id:618},{name:"SSC Ex 1",id:619},{name:"SSC Ex 2",id:620},{name:"SSC Ex 3",id:621},{name:"Abu Dhabi 1",id:600},{name:"Abu Dhabi 2",id:601},{name:"Abu Dhabi Prem 1",id:609},{name:"Abu Dhabi Prem 2",id:610},{name:"Alkass One",id:781},{name:"Alkass Two",id:782},{name:"Alkass Three",id:783},{name:"Alkass Four",id:784},{name:"Dubai Sports 1",id:604},{name:"Dubai Sports 2",id:605},{name:"Dubai Sports 3",id:606},{name:"Dubai Racing 2",id:608},{name:"OnTime Sports",id:611}
     ],
     "🇬🇧 UK Sports": [
-        {name:"TNT Sport 1",id:31},{name:"TNT Sport 2",id:32},{name:"TNT Sport 3",id:33},{name:"Sky Premier",id:130},{name:"Sky Football",id:35},{name:"Sky Action",id:37},{name:"Sky Tennis",id:46},{name:"Sky F1",id:60},{name:"Sky Golf",id:70},{name:"DAZN 1 UK",id:230}
+        {name:"TNT Sports 1 UK",id:31},{name:"TNT Sports 2 UK",id:32},{name:"TNT Sports 3 UK",id:33},{name:"TNT Sports 4 UK",id:34},{name:"Sky Premier League",id:130},{name:"Sky Football UK",id:35},{name:"Sky Plus",id:36},{name:"Sky Action UK",id:37},{name:"Sky Main Event",id:38},{name:"Sky Tennis UK",id:46},{name:"Sky F1 UK",id:60},{name:"Sky Cricket",id:65},{name:"Sky Golf UK",id:70},{name:"Sky News UK",id:366},{name:"Sky MIX UK",id:449},{name:"Sky Racing UK",id:554},{name:"DAZN 1 UK",id:230},{name:"LaLigaTV UK",id:276},{name:"LFC TV",id:826},{name:"MUTV UK",id:377},{name:"Viaplay 1 UK",id:451},{name:"Viaplay 2 UK",id:550},{name:"Racing Tv UK",id:555}
     ],
     "🇺🇸 US Sports": [
-        {name:"ESPN 1",id:44},{name:"ESPN 2",id:45},{name:"Fox Sports 1",id:39},{name:"NBC USA",id:53},{name:"NFL Net",id:405},{name:"NBA TV",id:404},{name:"MLB Net",id:399},{name:"NHL Net",id:663},{name:"Tennis Ch",id:40},{name:"WWE Net",id:376}
+        {name:"ESPN USA",id:44},{name:"ESPN2 USA",id:45},{name:"ESPNU USA",id:316},{name:"ESPNews",id:288},{name:"ESPN Deportes",id:375},{name:"Fox Sports 1 USA",id:39},{name:"Fox Sports 2 USA",id:758},{name:"FOX Soccer Plus",id:756},{name:"FOX Deportes USA",id:643},{name:"CBS Sports Net",id:308},{name:"CBS Golazo",id:910},{name:"NBC USA",id:53},{name:"NBC Sports Bay Area",id:753},{name:"NBC Sports Boston",id:754},{name:"NBC Sports Cali",id:755},{name:"NBC Sports Philly",id:777},{name:"NFL Network",id:405},{name:"NFL RedZone",id:667},{name:"NBA TV USA",id:404},{name:"MLB Network",id:399},{name:"NHL Network",id:663},{name:"Tennis Channel",id:40},{name:"BIG TEN Net",id:397},{name:"ACC Network USA",id:664},{name:"SEC Network USA",id:385},{name:"Pac-12 Network",id:287},{name:"Golf Channel",id:318},{name:"WWE Network",id:376}
     ],
     "🇪🇸 Spain Sports": [
-        {name:"Movistar LaLiga",id:84},{name:"Movistar UCL",id:435},{name:"DAZN LaLiga",id:538},{name:"Barca TV",id:522},{name:"Real Madrid TV",id:523},{name:"GOL PLAY",id:530}
+        {name:"Movistar Laliga",id:84},{name:"Movistar Campeones",id:435},{name:"Movistar Deportes",id:436},{name:"Movistar Deportes 2",id:438},{name:"Movistar Deportes 3",id:526},{name:"Movistar Deportes 4",id:527},{name:"Movistar Golf",id:528},{name:"Movistar Supercopa",id:437},{name:"DAZN 1 Spain",id:445},{name:"DAZN 2 Spain",id:446},{name:"DAZN 3 Spain",id:447},{name:"DAZN 4 Spain",id:448},{name:"DAZN F1 ES",id:537},{name:"DAZN LaLiga",id:538},{name:"#Vamos Spain",id:521},{name:"Barca TV Spain",id:522},{name:"Real Madrid TV",id:523},{name:"EuroSport 1 Spain",id:524},{name:"EuroSport 2 Spain",id:525},{name:"Teledeporte Spain",id:529},{name:"GOL PLAY Spain",id:530},{name:"LaLiga SmartBank",id:539}
     ],
     "🇫🇷 France Sports": [
-        {name:"Canal+ Sport",id:122},{name:"Canal+ Foot",id:463},{name:"beIN 1 FR",id:116},{name:"beIN 2 FR",id:117},{name:"RMC Sport 1",id:119},{name:"Eurosport 1 FR",id:772}
+        {name:"Canal+ France",id:121},{name:"Canal+ Sport FR",id:122},{name:"Canal+ Foot FR",id:463},{name:"Canal+ Sport360",id:464},{name:"Canal+ MotoGP FR",id:271},{name:"Canal+ Formula 1",id:273},{name:"DAZN Ligue 1 FR",id:960},{name:"RMC Sport 1 FR",id:119},{name:"RMC Sport 2 FR",id:120},{name:"Eurosport 1 FR",id:772},{name:"Eurosport 2 FR",id:773},{name:"L'Equipe France",id:645},{name:"Automoto La chaîne",id:961},{name:"Sport en France",id:965}
     ],
     "🇮🇹 Italy Sports": [
-        {name:"DAZN ZONA",id:877},{name:"Sky Sport UNO",id:461},{name:"Sky Sport F1",id:577},{name:"Rai Sport",id:882}
+        {name:"DAZN ZONA Italy",id:877},{name:"Sky Sport UNO",id:461},{name:"Sky Sport Arena",id:462},{name:"Sky Sport MAX",id:460},{name:"Sky Sport F1 IT",id:577},{name:"Sky Sport MotoGP",id:575},{name:"Sky Sport Tennis",id:576},{name:"Sky Sport Golf IT",id:574},{name:"Sky Sport 24 IT",id:869},{name:"Sky Sport Calcio",id:870},{name:"Sky Sport Basket",id:875},{name:"EuroSport 1 IT",id:878},{name:"EuroSport 2 IT",id:879},{name:"Rai Sport Italy",id:882}
     ],
     "🇵🇹 Portugal Sports": [
-        {name:"Sport TV 1",id:49},{name:"Sport TV 2",id:74},{name:"Eleven 1",id:455},{name:"Eleven 2",id:456},{name:"Benfica TV",id:380}
+        {name:"Sport TV1 PT",id:49},{name:"Sport TV2 PT",id:74},{name:"Sport TV3 PT",id:454},{name:"Sport TV4 PT",id:289},{name:"Sport TV5 PT",id:290},{name:"Sport TV6 PT",id:291},{name:"Eleven 1 PT",id:455},{name:"Eleven 2 PT",id:456},{name:"Eleven 3 PT",id:457},{name:"Eleven 4 PT",id:458},{name:"Eleven 5 PT",id:459},{name:"Benfica TV PT",id:380},{name:"Canal 11 Portugal",id:540},{name:"Sporting TV PT",id:716},{name:"Porto Canal PT",id:718}
     ],
     "🇵🇱 Poland Sports": [
-        {name:"Canal+ Sport PL",id:48},{name:"Polsat Sport 1",id:47},{name:"Polsat Premium 1",id:991},{name:"Eleven 1 PL",id:71}
+        {name:"Canal+ Sport PL",id:48},{name:"Canal+ Sport 2 PL",id:73},{name:"Canal+ Sport 3 PL",id:259},{name:"Canal+ Sport 5 PL",id:75},{name:"Canal+ Extra 1 PL",id:983},{name:"Canal+ Extra 2 PL",id:984},{name:"Polsat Sport PL",id:47},{name:"Polsat Sport 2 PL",id:50},{name:"Polsat Sport 3 PL",id:129},{name:"Polsat Premium 1",id:991},{name:"Polsat Premium 2",id:992},{name:"Eleven 1 PL",id:71},{name:"Eleven 2 PL",id:72},{name:"Eleven 3 PL",id:428},{name:"Eleven 4 PL",id:999},{name:"EuroSport 1 PL",id:57},{name:"EuroSport 2 PL",id:58},{name:"TVP Sport Poland",id:128}
     ],
     "🌍 Balkans Sports": [
-        {name:"Arena Prem 1",id:134},{name:"Arena Prem 2",id:135},{name:"Arena Serbia 1",id:429},{name:"Sport Klub 1",id:101}
+        {name:"Arena Prem 1",id:134},{name:"Arena Prem 2",id:135},{name:"Arena Prem 3",id:139},{name:"Arena Serbia 1",id:429},{name:"Arena Serbia 2",id:430},{name:"Arena Serbia 3",id:431},{name:"Arena Serbia 4",id:581},{name:"Arena Croatia 1",id:432},{name:"Arena Croatia 2",id:433},{name:"Arena Croatia 3",id:434},{name:"Arena Sport 1 BiH",id:579},{name:"Sport Klub 1 HR",id:101},{name:"Sport Klub 2 HR",id:102},{name:"Sport Klub 3 HR",id:103},{name:"Sport Klub Golf",id:710}
     ],
-    "🇨🇿 Czech Sports": [
-        {name:"Canal+ Sport CZ",id:1020},{name:"Nova Sport 1",id:1021},{name:"Premier Sport 1",id:1030}
-    ],
-    "🌎 South America": [
-        {name:"ESPN Premium AR",id:387},{name:"Fox Sports AR",id:787},{name:"SporTV 1 BR",id:78},{name:"ESPN 1 BR",id:81},{name:"Win Sports+ CO",id:392}
-    ],
-    "🇺🇸 USA General": [
-        {name:"ABC USA",id:51},{name:"CBS USA",id:52},{name:"AMC USA",id:303},{name:"A&E USA",id:302},{name:"HBO USA",id:321},{name:"Discovery",id:313},{name:"Kids TV",id:295},{name:"Disney Ch",id:312},{name:"Cartoon Net",id:339},{name:"TLC",id:337},{name:"CNN USA",id:345},{name:"MSNBC",id:327}
+    "🇨🇿 Czech & SK": [
+        {name:"Canal+ Sport CZ",id:1020},{name:"Nova Sport 1 CZ",id:1021},{name:"Nova Sport 2 CZ",id:1022},{name:"Nova Sport 3 CZ",id:1023},{name:"Nova Sport 4 CZ",id:1024},{name:"Premier Sport 1",id:1030},{name:"Premier Sport 2",id:1031},{name:"Premier Sport 3",id:1032},{name:"CT Sport CZ",id:1033},{name:"Oneplay Sport 1",id:1027},{name:"Nova Sport 3 SK",id:1060},{name:"Nova Sport 4 SK",id:1061},{name:"JOJ Šport SK",id:1052}
     ],
     "🌍 Documentary": [
-        {name:"History 1",id:502},{name:"History 2",id:503},{name:"Discovery Ch",id:504},{name:"Nat Geo USA",id:511},{name:"Nat Geo Wild",id:512},{name:"Animal Plan",id:514},{name:"FYI Channel",id:520}
+        {name:"History USA",id:322},{name:"National Geo",id:328},{name:"Nat Geo Wild USA",id:745},{name:"Discovery Channel",id:313},{name:"Discovery Family",id:657},{name:"Discovery Life",id:311},{name:"Discovery Turbo",id:661},{name:"Animal Planet",id:304},{name:"Science Channel",id:294},{name:"Smithsonian Ch",id:603},{name:"AHC Channel",id:206},{name:"Crime+ Invest",id:669}
+    ],
+    "📺 Entertainment": [
+        {name:"HBO USA",id:321},{name:"HBO2 USA",id:689},{name:"AMC USA",id:303},{name:"Cinemax USA",id:374},{name:"Showtime USA",id:333},{name:"Starz USA",id:335},{name:"FX USA",id:317},{name:"FXX USA",id:298},{name:"Comedy Central",id:310},{name:"Cartoon Network",id:339},{name:"Disney Channel",id:312},{name:"NICK JR",id:329},{name:"NICK USA",id:330},{name:"Adult Swim",id:295},{name:"CNN USA",id:345},{name:"MSNBC",id:327},{name:"Fox News",id:347},{name:"BBC News HD",id:349}
     ],
     "🔒 Secret": [
-        {name:"18+ P-01",id:801},{name:"18+ P-02",id:802},{name:"18+ P-03",id:803},{name:"18+ P-04",id:804},{name:"18+ P-05",id:805},{name:"18+ P-06",id:806},{name:"18+ P-07",id:807},{name:"18+ P-08",id:808},{name:"18+ P-09",id:809},{name:"18+ P-10",id:810},{name:"18+ P-11",id:811},{name:"18+ P-12",id:812},{name:"18+ P-13",id:813},{name:"18+ P-14",id:814},{name:"18+ P-15",id:815},{name:"18+ P-16",id:816},{name:"18+ P-17",id:817},{name:"18+ P-18",id:818},{name:"18+ P-19",id:819},{name:"18+ P-20",id:820}
+        {name:"18+ (Player-01)",id:501},{name:"18+ (Player-02)",id:502},{name:"18+ (Player-03)",id:503},{name:"18+ (Player-04)",id:504},{name:"18+ (Player-05)",id:505},{name:"18+ (Player-06)",id:506},{name:"18+ (Player-07)",id:507},{name:"18+ (Player-08)",id:508},{name:"18+ (Player-09)",id:509},{name:"18+ (Player-10)",id:510},{name:"18+ (Player-11)",id:511},{name:"18+ (Player-12)",id:512},{name:"18+ (Player-13)",id:513},{name:"18+ (Player-14)",id:514},{name:"18+ (Player-15)",id:515},{name:"18+ (Player-16)",id:516},{name:"18+ (Player-17)",id:517},{name:"18+ (Player-18)",id:518},{name:"18+ (Player-19)",id:519},{name:"18+ (Player-20)",id:520}
     ]
 };
 
@@ -243,15 +299,25 @@ let currentCat = "🟣 beIN Sports";
 let savedSrc = "";
 let currentChannelIndex = -1;
 
+function clearAllSessionData() {
+    localStorage.clear();
+    sessionStorage.clear();
+    if(player) player.src = "";
+}
+window.addEventListener('beforeunload', clearAllSessionData);
+window.addEventListener('unload', clearAllSessionData);
+
 function init() {
+    clearAllSessionData();
     regSide.innerHTML = "";
     Object.keys(allData).forEach((cat) => {
         if(cat === "🔒 Secret") return;
         const btn = document.createElement('button');
         btn.className = 'group-btn';
         btn.tabIndex = 0;
-        if(cat.includes('beIN')) btn.classList.add('bein-p');
-        if(cat.includes('Arabic')) btn.classList.add('ara-g');
+        if(categoryStyles[cat]) {
+            btn.style.background = categoryStyles[cat].bg;
+        }
         btn.innerText = cat;
         btn.onclick = () => selectCat(cat, btn);
         regSide.appendChild(btn);
@@ -329,7 +395,6 @@ function playChannel(id, el) {
     setTimeout(() => { loader.style.display = 'none'; }, 1200);
 }
 
-/* وظائف التحكم المعدلة بالكامل */
 function togglePlayPause() {
     if (player.src !== "") {
         savedSrc = player.src;
@@ -408,6 +473,7 @@ function doSearch() {
         });
     });
 }
+
 window.onload = init;
 </script>
 </body>
