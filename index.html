@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KiKON-tv ULTRA V65 | Pro Edition</title>
+    <title>KiKON-tv ULTRA V65 | Fixed Audio</title>
     <style>
         :root {
             --bg: #020617;
@@ -36,14 +36,17 @@
 
         iframe { width: 100%; height: 100%; border: none; z-index: 1; }
 
+        /* شعار الدرع - غير قابل للاعتراض بصرياً وقدرة اللمس ملغاة منه لعدم تعطيل الفيديو */
         .kikon-shield {
             position: absolute; top: 0; right: 0; width: 320px; height: 95px; 
             background: linear-gradient(135deg, #020617, #1e293b); z-index: 150;
             display: flex; align-items: center; justify-content: center; color: var(--accent); font-weight: 900; font-size: 1.3rem;
-            border-bottom-left-radius: 20px; border: 1px solid rgba(255,255,255,0.1); pointer-events: auto; box-shadow: -5px 5px 25px rgba(0,0,0,0.9);
+            border-bottom-left-radius: 20px; border: 1px solid rgba(255,255,255,0.1); 
+            pointer-events: none; /* 👈 يمنع الدرع من حظر النقرات */
+            box-shadow: -5px 5px 25px rgba(0,0,0,0.9);
         }
 
-        .player-tools { position: absolute; top: 10px; left: 10px; z-index: 160; display: flex; gap: 6px; flex-wrap: wrap; }
+        .player-tools { position: absolute; top: 10px; left: 10px; z-index: 200; display: flex; gap: 6px; flex-wrap: wrap; }
         .tool-btn {
             background: rgba(15, 23, 42, 0.85); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px;
             border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; backdrop-filter: blur(5px); transition: all 0.2s;
@@ -51,17 +54,18 @@
         .tool-btn:hover { background: var(--primary); border-color: var(--accent); transform: translateY(-2px); }
         .tool-btn:active { transform: scale(0.95); }
 
-        /* قناع الحجب المخصص يترك المساحة السفلية لزر الصوت */
+        /* 🔥 الإصلاح الجوهري هنا: قص منطقة اللمس السفلية بنسبة 15% للسماح بالضغط على زر الصوت بدون أي عائق */
         #adBreaker { 
             position: absolute; 
             top: 0; 
             left: 0; 
             width: 100%; 
-            height: 80%; 
+            height: 100%; 
             z-index: 100; 
             background: rgba(0,0,0,0.01); 
             cursor: pointer; 
-            display: none; 
+            display: none;
+            clip-path: inset(0 0 15% 0); /* 👈 يلغي تفاعل القناع تماماً في الـ 15% السفلية */
         }
 
         #soundTip {
@@ -300,7 +304,6 @@ function playChannel(id, el, index) {
     }, 1500);
 }
 
-// 🔊 حل دائم لتفعيل الصوت وتفادي حظر المتصفحات
 function enableGlobalAudio() {
     if (player && player.contentWindow) {
         try {
