@@ -147,7 +147,61 @@
             .ctrl-btn { padding: 5px 6px; font-size: 0.7rem; }
             .kikon-shield { width: 70%; height: 115px; font-size: 0.85rem; }
         }
-    </style>
+    
+/* ===== KIKON NEW - مباريات مستقرة ===== */
+.matches-app{height:100%;overflow-y:auto;background:var(--bg);padding:12px;direction:rtl}
+.matches-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.matches-head h2{font-size:1rem;color:var(--accent)}
+.matches-status{font-size:.72rem;color:var(--text-sub)}
+.matches-error{background:#3f1d1d;border:1px solid #ef4444;border-radius:8px;padding:9px;font-size:.75rem;margin-bottom:10px}
+.matches-country{font-size:.9rem;font-weight:900;color:var(--accent);padding:7px 4px 5px;border-bottom:1px solid #334155;margin-top:7px}
+.matches-league{background:#111827;border:1px solid #334155;border-radius:8px;padding:6px 9px;font-size:.76rem;font-weight:800;margin-top:6px}
+.matches-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:7px 0 10px;direction:rtl}
+.match-tile{position:relative;background:var(--card-bg);border:1px solid #334155;border-radius:9px;padding:8px;min-height:150px;cursor:pointer;transition:.15s;overflow:hidden}
+.match-tile:hover{border-color:var(--accent)}
+.match-tile.live{border-color:#22c55e;box-shadow:0 0 0 1px rgba(34,197,94,.18)}
+.match-time{text-align:center;font-size:.72rem;font-weight:800}
+.match-state{display:inline-block;margin-top:2px;font-size:.58rem;color:var(--text-sub)}
+.match-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:5px;min-height:62px;margin-top:4px;text-align:center}
+.match-team{font-size:.72rem;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+.match-team img{display:block;width:28px;height:28px;object-fit:contain;margin:0 auto 3px}
+.match-score{font-size:1rem;font-weight:900;direction:ltr;min-width:45px}
+.match-meta{text-align:center;color:var(--text-sub);font-size:.56rem;margin-top:3px}
+.match-channels{display:none;border-top:1px solid #334155;margin-top:6px;padding-top:6px}
+.match-tile.open .match-channels{display:block}
+.match-channel-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+.match-channel{display:flex;align-items:center;gap:4px;background:#0f172a;color:#fff;border:1px solid #475569;border-radius:6px;padding:4px;cursor:pointer;font-size:.58rem;min-width:0}
+.match-channel img{width:22px;height:22px;object-fit:contain;flex:0 0 auto}
+.match-channel span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.match-note{font-size:.54rem;color:var(--text-sub);margin-bottom:4px}
+.match-cinema{display:none;position:absolute;inset:0;background:#000;z-index:15;align-items:center;justify-content:center}
+.match-tile.cinema .match-cinema{display:flex}
+.match-cinema button{position:absolute;top:5px;left:5px;z-index:20;background:rgba(0,0,0,.8);color:#fff;border:1px solid #475569;border-radius:5px;padding:4px 7px;cursor:pointer}
+.match-cinema-text{color:#fff;text-align:center;padding:15px;font-size:.72rem}
+.matches-channels-box{margin-top:14px;border-top:2px solid #334155;padding-top:8px}
+.channels-tools{display:flex;gap:6px;align-items:center;margin:6px 0}
+.channels-tools input{flex:1;background:#111827;color:#fff;border:1px solid #475569;border-radius:7px;padding:7px 9px;font-size:.72rem}
+.channels-tools button{background:#1e293b;color:#fff;border:1px solid #475569;border-radius:7px;padding:7px 10px;cursor:pointer}
+.broadcast-country{font-weight:900;color:var(--accent);font-size:.78rem;padding:6px 2px;border-bottom:1px solid #334155;margin-top:6px}
+.broadcast-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:5px 0}
+.broadcast-card{display:flex;align-items:center;gap:5px;background:var(--card-bg);border:1px solid #334155;color:#fff;border-radius:7px;padding:6px;cursor:pointer;min-width:0;text-align:right}
+.broadcast-card img{width:25px;height:25px;object-fit:contain;flex:0 0 auto}
+.broadcast-card span{font-size:.61rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:1150px){.matches-row{grid-template-columns:repeat(3,minmax(0,1fr))}.broadcast-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:700px){.matches-row{grid-template-columns:repeat(2,minmax(0,1fr))}.broadcast-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:460px){.matches-row,.broadcast-grid{grid-template-columns:1fr}}
+
+</style>
+
+<style id="kikon-v4-channel-switch">
+.match-channel.selected{
+    outline:2px solid #22c55e!important;
+    box-shadow:0 0 0 2px rgba(34,197,94,.18);
+    transform:translateY(-1px);
+}
+.match-channel{transition:all .15s ease}
+.match-cinema{display:none!important}
+</style>
 </head>
 <body>
 
@@ -195,10 +249,30 @@
             <div class="key-row"><button class="key" tabindex="0" onclick="press('0')">0</button><button class="key" tabindex="0" style="border-color:var(--danger);color:var(--danger)" onclick="cls()">C</button></div>
         </div>
         <div class="grid" id="grid"></div>
-        <div id="matchesContainer" style="display:none; height: 100%;">
-            <div class="matches-placeholder">
-                <span style="font-size: 2rem;">⚽</span>
-                <span>جدول المباريات اليومية سيعرض هنا</span>
+        <div id="matchesContainer" style="display:none; height:100%;">
+            <div class="matches-app" id="matchesApp">
+                <div class="matches-head">
+                    <h2>⚽ مباريات كرة القدم اليوم</h2>
+                    <div class="matches-status" id="matchesStatus">اضغط على «المباريات» لجلب البيانات الحية</div>
+                </div>
+                <div id="matchesList">
+                    <div class="matches-placeholder">
+                        <span style="font-size:2rem;">⚽</span>
+                        <span>جاري تجهيز المباريات...</span>
+                    </div>
+                </div>
+                <div class="matches-channels-box">
+                    <div class="matches-head" style="margin-bottom:4px">
+                        <h2>📺 القنوات والباقات الموجودة في الملف</h2>
+                        <div class="matches-status" id="channelCount"></div>
+                    </div>
+                    <div class="channels-tools">
+                        <input id="matchChannelSearch" type="search" placeholder="🔎 ابحث عن قناة أو باقة...">
+                        <button type="button" onclick="filterMatchChannels()">بحث</button>
+                        <button type="button" onclick="clearMatchChannels()">✕</button>
+                    </div>
+                    <div id="matchChannelsList"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -419,6 +493,7 @@ function switchView(mode) {
     viewMode = mode;
     document.getElementById('btnCh').classList.toggle('active', mode === 'channels');
     document.getElementById('btnMatches').classList.toggle('active', mode === 'matches');
+
     if(mode === 'channels') {
         grid.style.display = 'grid';
         matchesContainer.style.display = 'none';
@@ -427,7 +502,10 @@ function switchView(mode) {
         grid.style.display = 'none';
         keypad.style.display = 'none';
         matchesContainer.style.display = 'block';
-        document.getElementById('side').style.display = 'none';
+        // إبقاء الباقات والقنوات الأصلية ظاهرة في اليسار/الجانب.
+        document.getElementById('side').style.display = 'flex';
+        renderMatchChannels();
+        loadKikonMatches();
     }
 }
 
@@ -580,6 +658,505 @@ function doSearch() {
 }
 
 window.onload = init;
+
+/* =========================================================
+   KIKON NEW — Football module
+   لا نستخدم مشغل فيديو جديد. عند اختيار قناة ناقلة نستعمل
+   playChannel() الأصلي الموجود في الملف.
+   ========================================================= */
+const KIKON_FOOTBALL_KEY = '0a2ad8b2734fa15e918507f673ab0c64';
+const KIKON_FOOTBALL_BASE = 'https://v3.football.api-sports.io';
+let kikonMatchesCache = [];
+let kikonMatchesTimer = null;
+let kikonChannelFilter = '';
+
+function kikonDate() {
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone:'Africa/Casablanca', year:'numeric', month:'2-digit', day:'2-digit'
+    }).format(new Date());
+}
+function kEsc(v) {
+    return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function kFlag(country) {
+    const map = {
+        'England':'🇬🇧','Spain':'🇪🇸','Italy':'🇮🇹','France':'🇫🇷','Germany':'🇩🇪',
+        'Portugal':'🇵🇹','Netherlands':'🇳🇱','Belgium':'🇧🇪','Turkey':'🇹🇷',
+        'Morocco':'🇲🇦','Saudi-Arabia':'🇸🇦','Saudi Arabia':'🇸🇦','Qatar':'🇶🇦',
+        'Egypt':'🇪🇬','United Arab Emirates':'🇦🇪','UAE':'🇦🇪','Brazil':'🇧🇷',
+        'Argentina':'🇦🇷','Mexico':'🇲🇽','USA':'🇺🇸','United States':'🇺🇸',
+        'Canada':'🇨🇦','Greece':'🇬🇷','Poland':'🇵🇱','Romania':'🇷🇴',
+        'Serbia':'🇷🇸','Croatia':'🇭🇷','Denmark':'🇩🇰','Norway':'🇳🇴',
+        'Sweden':'🇸🇪','Switzerland':'🇨🇭','Austria':'🇦🇹','World':'🌍'
+    };
+    return map[country] || '🌍';
+}
+function kStatusRank(s) {
+    if(['1H','2H','HT','ET','BT','P','LIVE'].includes(s)) return 0;
+    if(['NS','TBD'].includes(s)) return 1;
+    if(['PST','SUSP'].includes(s)) return 2;
+    return 3;
+}
+function kStatus(s) {
+    const m={NS:'لم تبدأ',TBD:'لم يحدد','1H':'الشوط الأول',HT:'استراحة','2H':'الشوط الثاني',ET:'وقت إضافي',BT:'ركلات ترجيح',FT:'انتهت',AET:'انتهت بعد الإضافي',PEN:'ركلات الترجيح',PST:'مؤجلة',CANC:'ملغاة',SUSP:'موقوفة'};
+    return m[s] || s || '';
+}
+function kTime(iso) {
+    try { return new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso)); }
+    catch(e){ return '--:--'; }
+}
+
+function kChannelCatalog() {
+    const out=[];
+    (channelsData||[]).forEach(g => (g.channels||[]).forEach(ch => out.push({...ch, category:g.category})));
+    return out;
+}
+
+/* مطابقة آمنة للقنوات الموجودة فعلياً في channelsData.
+   لا نقول إن القناة رسمياً ناقلة إلا إذا قدم API بيانات broadcast صريحة. */
+function kFindChannels(fixture) {
+    const all=kChannelCatalog();
+    const league=String(fixture.league?.name||'').toLowerCase();
+    const country=String(fixture.league?.country||'').toLowerCase();
+    const keys=[];
+    const add=(arr)=>arr.forEach(x=>keys.push(String(x).toLowerCase()));
+
+    if(/england|premier league|championship|fa cup|efl/.test(league+' '+country)) add(['tnt sports','sky sports','bein sports','premier sports']);
+    else if(/spain|laliga|copa del rey|segunda/.test(league+' '+country)) add(['laliga','movistar','bein sports','espn']);
+    else if(/italy|serie a|coppa italia/.test(league+' '+country)) add(['serie a','sky sport','dazn','bein sports']);
+    else if(/france|ligue 1|coupe de france/.test(league+' '+country)) add(['canal+','bein sports','dazn']);
+    else if(/germany|bundesliga|dfb/.test(league+' '+country)) add(['bundesliga','sky sport','dazn']);
+    else if(/morocco|botola/.test(league+' '+country)) add(['arryadia','bein sports','ssc']);
+    else if(/saudi|saudi arabia/.test(league+' '+country)) add(['ssc','bein sports']);
+    else if(/qatar/.test(league+' '+country)) add(['alkass','bein sports']);
+    else if(/egypt/.test(league+' '+country)) add(['ontime','bein sports']);
+    else if(/brazil/.test(league+' '+country)) add(['espn brasil','sportv','tnt brasil','globo']);
+    else if(/argentina/.test(league+' '+country)) add(['espn argentina','tyc sports','tnt sports argentina']);
+    else if(/mexico/.test(league+' '+country)) add(['tudn mx','espn','fox sports','claro sports']);
+    else if(/usa|united states|mls/.test(league+' '+country)) add(['espn usa','fox','cbs sports','tudn usa','bein sports usa']);
+    else if(/canada/.test(league+' '+country)) add(['tsn','sportsnet','rds']);
+    else if(/turkey|super lig/.test(league+' '+country)) add(['bein sports','trt spor','a spor']);
+    else if(/portugal|primeira liga/.test(league+' '+country)) add(['sport tv','eleven sports','dazn']);
+
+    const result=[];
+    for(const key of keys){
+        all.forEach(ch=>{
+            const n=String(ch.name||'').toLowerCase();
+            if((n.includes(key)||key.includes(n)) && !result.some(x=>x.id===ch.id)) result.push(ch);
+        });
+        if(result.length>=6) break;
+    }
+    return result.slice(0,6);
+}
+
+
+/* SMART MATCH FILTER + RANKING + BROADCAST MATCHING */
+
+const KIKON_MAJOR_LEAGUES={
+ 'UEFA Champions League':120,'UEFA Europa League':115,'UEFA Europa Conference League':100,
+ 'Premier League':115,'La Liga':115,'Serie A':115,'Bundesliga':115,'Ligue 1':110,
+ 'Eredivisie':92,'Primeira Liga':92,'Belgian Pro League':82,'Scottish Premiership':82,
+ 'Championship':84,'FA Cup':90,'Copa del Rey':90,'Coppa Italia':90,'DFB Pokal':90,'Coupe de France':88,
+ 'Saudi Pro League':104,'Qatar Stars League':82,'UAE Pro League':80,'Botola Pro':100,
+ 'Egyptian Premier League':96,'CAF Champions League':108,'CAF Confederation Cup':94,
+ 'Major League Soccer':72,'MLS':72,'Brasileirão Série A':92,'Liga Profesional Argentina':88,
+ 'Liga MX':82,'Copa Libertadores':108,'Copa Sudamericana':96,
+ 'J1 League':76,'K League 1':74,
+ 'World Cup':125,'European Championship':125,'Africa Cup of Nations':112,
+ 'Copa America':108,'Asian Cup':100,'CONCACAF Gold Cup':88
+};
+
+/* شمال أفريقيا والعالم العربي لهما أولوية واضحة، مع بقاء أوروبا الكبرى في الصدارة */
+const KIKON_REGION_PRIORITY={
+ 'Morocco':115,'Algeria':110,'Tunisia':110,'Egypt':108,'Libya':100,
+ 'Saudi Arabia':102,'Qatar':90,'United Arab Emirates':88,'UAE':88,
+ 'England':100,'Spain':100,'Italy':100,'Germany':100,'France':98,
+ 'Portugal':88,'Netherlands':84,'Belgium':80,'Turkey':88,'Scotland':76,
+ 'Brazil':80,'Argentina':80,'Mexico':72,'USA':55,'United States':55,
+ 'Japan':58,'South Korea':55,'South Africa':72
+};
+
+function kLeagueScore(f){
+ const n=String(f.league?.name||'');
+ if(KIKON_MAJOR_LEAGUES[n]!=null)return KIKON_MAJOR_LEAGUES[n];
+ const x=n.toLowerCase();
+ if(/champions league|world cup|euro|copa america|afcon|africa cup/.test(x))return 105;
+ if(/premier|la liga|serie a|bundesliga|ligue 1/.test(x))return 98;
+ if(/cup|super cup|national/.test(x))return 72;
+ return 20;
+}
+function kCountryScore(f){
+ return KIKON_REGION_PRIORITY[String(f.league?.country||'')]||12;
+}
+function kIsMajorFixture(f){
+ return kLeagueScore(f)>=65 || kCountryScore(f)>=70;
+}
+
+/* ترتيب القنوات بحسب البطولة والدولة، مع fallback داخل نفس العائلة */
+function kFindChannels(f){
+ const all=kChannelCatalog();
+ const league=String(f.league?.name||'').toLowerCase();
+ const country=String(f.league?.country||'').toLowerCase();
+ const home=String(f.teams?.home?.name||'').toLowerCase();
+ const away=String(f.teams?.away?.name||'').toLowerCase();
+
+ const rules=[
+  [/morocco|botola|coupe du trone/,'arryadia|bein sports|ssc'],
+  [/algeria|algerian|ligue 1|coupe d'algerie/,'entv|canal algerie|bein sports'],
+  [/tunisia|tunisian|ligue 1|coupe de tunisie/,'wataniya|bein sports|elhiwar'],
+  [/egypt|egyptian|premier league/,'ontime|bein sports|ssc'],
+  [/libya|libyan/,'libya sport|bein sports'],
+  [/saudi|saudi arabia/,'ssc|bein sports'],
+  [/qatar/,'alkass|bein sports'],
+  [/uae|united arab emirates|emirates/,'abu dhabi sports|dubai sports|bein sports'],
+  [/england|premier|championship|fa cup/,'sky sports|tnt sports|bein sports|premier sports'],
+  [/spain|laliga|copa del rey/,'movistar|laliga|bein sports|dazn|espn'],
+  [/italy|serie a|coppa italia/,'dazn|sky sport|bein sports'],
+  [/germany|bundesliga|dfb/,'sky sport|dazn|sportdigital'],
+  [/france|ligue 1|coupe de france/,'canal\\+|bein sports|dazn'],
+  [/portugal|primeira liga/,'sport tv|eleven sports|dazn'],
+  [/turkey|super lig/,'bein sports|trt spor|a spor'],
+  [/netherlands|eredivisie/,'espn|ziggo|sport1'],
+  [/brazil/,'sportv|espn|tnt brasil|globo'],
+  [/argentina/,'tyc sports|espn|tnt sports']
+ ];
+
+ const scored=all.map(ch=>{
+   const n=String(ch.name||'').toLowerCase();
+   let s=0;
+   /* مطابقة اسم البطولة */
+   league.split(/[\s\-:]+/).filter(w=>w.length>3).forEach(w=>{if(n.includes(w))s+=12});
+   /* الدولة/البطولة */
+   rules.forEach(([rx,cr])=>{
+     if(rx.test(country+' '+league) && new RegExp(cr,'i').test(n))s+=35;
+   });
+   /* احتياط عام للقنوات الرياضية المعروفة */
+   if(/bein sports|espn|dazn|sky sports|tnt sports|ssc|canal\+|sport tv/.test(n))s+=2;
+   return {ch,s};
+ }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+ return scored.slice(0,6).map(x=>x.ch);
+}
+
+/* ترتيب حازم:
+   1) المباريات التي تلعب الآن كلها في الأعلى
+   2) القادمة حسب الوقت
+   3) البطولة
+   4) أولوية أوروبا الكبرى والعالم العربي وشمال أفريقيا
+*/
+function kFixtureLive(f){
+ const s=String(f.fixture?.status?.short||'');
+ return ['1H','HT','2H','ET','BT','P','LIVE'].includes(s);
+}
+function kFixtureUpcoming(f){
+ return ['NS','TBD'].includes(String(f.fixture?.status?.short||''));
+}
+function kFixtureRank(f){
+ const live=kFixtureLive(f);
+ return {
+   live:live?1:0,
+   league:kLeagueScore(f),
+   country:kCountryScore(f),
+   time:new Date(f.fixture?.date||0).getTime()||0
+ };
+}
+function kMatchCard(f) {
+    const st=f.fixture?.status?.short||'';
+    const live=kStatusRank(st)===0;
+    const h=f.teams?.home||{}, a=f.teams?.away||{};
+    const hs=f.goals?.home, as=f.goals?.away;
+    const score=(hs==null||as==null)?'—':`${hs} - ${as}`;
+    const channels=kFindChannels(f);
+    const id=Number(f.fixture?.id||0);
+    return `<article class="match-tile ${live?'live':''}" id="km-${id}" onclick="toggleKMatch(${id})">
+        <div class="match-time">${live?'🔴 ':''}${kTime(f.fixture?.date)}<div class="match-state">${kEsc(kStatus(st))}${f.fixture?.status?.elapsed!=null?' '+f.fixture.status.elapsed+"'":''}</div></div>
+        <div class="match-teams">
+            <div class="match-team">${h.logo?`<img src="${kEsc(h.logo)}" alt="">`:''}${kEsc(h.name||'المضيف')}</div>
+            <div class="match-score">${kEsc(score)}</div>
+            <div class="match-team">${a.logo?`<img src="${kEsc(a.logo)}" alt="">`:''}${kEsc(a.name||'الضيف')}</div>
+        </div>
+        <div class="match-meta">${kFlag(f.league?.country)} ${kEsc(f.league?.country||'')} · ${kEsc(f.league?.name||'')}</div>
+        <div class="match-channels" onclick="event.stopPropagation()">
+            <div class="match-note">📺 قنوات موجودة في ملفك ومطابقة للدولة/البطولة:</div>
+            ${channels.length?`<div class="match-channel-list">${channels.map(ch=>`
+                <button class="match-channel" type="button" onclick="playKMatchChannel(${id},${Number(ch.id)},event)">
+                    ${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)}</span>
+                </button>`).join('')}</div>`:'<div class="match-note">لم يتم العثور على مطابقة تلقائية. استخدم بحث القنوات أدناه.</div>'}
+        </div>
+    </article>`;
+}
+
+function toggleKMatch(id) {
+    const el=document.getElementById('km-'+id);
+    if(el) el.classList.toggle('open');
+}
+
+function playKMatchChannel(matchId, channelId, ev) {
+    if(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+
+    const ch=kChannelCatalog().find(x=>Number(x.id)===Number(channelId));
+    const card=document.getElementById('km-'+matchId);
+    if(!ch||!card) return;
+
+    /*
+      السلوك الجديد:
+      - لا يوجد زر "إغلاق السينما".
+      - لا نغلق البطاقة ولا نغادرها.
+      - الضغط على أي قناة يشغلها مباشرة في المشغل الأصلي.
+      - الضغط على قناة أخرى يستبدل القناة الحالية مباشرة.
+      - نبقى في نفس المباراة وفي نفس قائمة القنوات.
+    */
+    try {
+        playChannel(ch.id, null);
+
+        card.classList.add('open');
+        card.classList.add('cinema');
+
+        /* إبقاء وضع السينما للمشغل الرئيسي، وليس إنشاء مشغل داخل البطاقة. */
+        document.getElementById('playerContainer')?.classList.add('cinema-mode');
+
+        /* إبراز القناة الحالية فقط */
+        card.querySelectorAll('.match-channel').forEach(btn=>{
+            btn.classList.remove('selected');
+            btn.removeAttribute('aria-current');
+        });
+
+        const selected = [...card.querySelectorAll('.match-channel')]
+            .find(btn => btn.textContent.includes(ch.name));
+        if(selected){
+            selected.classList.add('selected');
+            selected.setAttribute('aria-current','true');
+        }
+    } catch(e) {
+        console.error('playChannel error',e);
+    }
+}
+
+/* احتفاظ بالتوافق مع أي كود قديم يستدعيها، لكن بدون إغلاق المشغل. */
+function closeKMatchCinema(id,ev) {
+    if(ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+    }
+    const card=document.getElementById('km-'+id);
+    if(card) card.classList.add('open');
+    /* لا نوقف القناة ولا نزيل cinema-mode */
+}
+
+async function kFootballFetch(date) {
+    const r=await fetch(KIKON_FOOTBALL_BASE+'/fixtures?date='+encodeURIComponent(date),{
+        method:'GET',cache:'no-store',
+        headers:{'x-apisports-key':KIKON_FOOTBALL_KEY,'Accept':'application/json'}
+    });
+    const text=await r.text();
+    let json;
+    try{json=JSON.parse(text)}catch(e){throw new Error('استجابة غير صالحة من API-Football');}
+    if(!r.ok) throw new Error('API-Football HTTP '+r.status);
+    if(json.errors && Object.keys(json.errors).length) throw new Error(Object.values(json.errors).join(' | '));
+    return Array.isArray(json.response)?json.response:[];
+}
+
+function renderKMatches(fixtures) {
+    kikonMatchesCache=fixtures||[];
+    const box=document.getElementById('matchesList');
+    if(!box)return;
+    const filteredFixtures=kikonMatchesCache.filter(kIsMajorFixture);
+    const liveFixtures=filteredFixtures.filter(kFixtureLive)
+      .sort((a,b)=>kLeagueScore(b)-kLeagueScore(a)||kCountryScore(b)-kCountryScore(a));
+    const upcomingFixtures=filteredFixtures.filter(f=>!kFixtureLive(f))
+      .sort((a,b)=>{
+        const ta=new Date(a.fixture?.date||0).getTime();
+        const tb=new Date(b.fixture?.date||0).getTime();
+        /* القادم: الوقت أولاً، ثم البطولة عند تساوي الوقت */
+        return ta-tb || kLeagueScore(b)-kLeagueScore(a) || kCountryScore(b)-kCountryScore(a);
+      });
+    const sorted=[...liveFixtures,...upcomingFixtures];
+    const countries=new Map();
+    sorted.forEach(f=>{
+        const c=f.league?.country||'أخرى', l=f.league?.name||'بطولة أخرى';
+        if(!countries.has(c))countries.set(c,new Map());
+        if(!countries.get(c).has(l))countries.get(c).set(l,[]);
+        countries.get(c).get(l).push(f);
+    });
+    let out='';
+    if(liveFixtures.length){
+        out+=`<div class="matches-country" style="font-size:1rem;border-bottom:2px solid #22c55e">🔴 المباريات المباشرة الآن <span style="font-size:.65rem;color:var(--text-sub)">(${liveFixtures.length})</span></div>`;
+    }
+    if(upcomingFixtures.length){
+        out+=`<div class="matches-country" style="font-size:.95rem">🕐 المباريات القادمة حسب التوقيت</div>`;
+    }
+    for(const [country, leagues] of countries){
+        out+=`<div class="matches-country">${kFlag(country)} ${kEsc(country)}</div>`;
+        for(const [league,list] of leagues){
+            out+=`<div class="matches-league">🏆 ${kEsc(league)} <span style="color:var(--text-sub)">(${list.length})</span></div><div class="matches-row">`;
+            out+=list.map(kMatchCard).join('');
+            out+='</div>';
+        }
+    }
+    box.innerHTML=out||'<div class="matches-placeholder">لا توجد مباريات لهذا اليوم.</div>';
+}
+
+async function loadKikonMatches() {
+    const status=document.getElementById('matchesStatus');
+    const date=kikonDate();
+    if(status)status.textContent='جاري جلب مباريات '+date+'...';
+    try{
+        const fixtures=await kFootballFetch(date);
+        renderKMatches(fixtures);
+        if(status)status.textContent=`${document.querySelectorAll('.match-tile').length} مباراة مهمة من أصل ${fixtures.length} · آخر تحديث ${new Date().toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit'})}`;
+    }catch(e){
+        console.error(e);
+        if(status)status.textContent='تعذر جلب المباريات';
+        const box=document.getElementById('matchesList');
+        if(box)box.innerHTML=`<div class="matches-error">⚠️ ${kEsc(e.message)}<br><small>تحقق من اتصال الإنترنت وصلاحية API-Football.</small></div>`;
+    }
+}
+
+function renderMatchChannels() {
+    const box=document.getElementById('matchChannelsList');
+    if(!box)return;
+    const all=kChannelCatalog();
+    const q=(kikonChannelFilter||'').trim().toLowerCase();
+    const filtered=q?all.filter(ch=>
+        String(ch.name||'').toLowerCase().includes(q)||
+        String(ch.category||'').toLowerCase().includes(q)
+    ):all;
+    const groups=new Map();
+    filtered.forEach(ch=>{
+        const n=String(ch.name||'').toLowerCase();
+        let c='🌐 دولي / أخرى';
+        if(/bein|arr[y]adia|morocco|maroc|ssc|saudi|alkass|qatar|ontime|egypt|arab/.test(n))c='🌍 العربية والشرق الأوسط';
+        else if(/sky|tnt sports|premier sports|bbc|itv|uk|ireland/.test(n))c='🇬🇧 بريطانيا وإيرلندا';
+        else if(/laliga|movistar|spain|españa/.test(n))c='🇪🇸 إسبانيا';
+        else if(/serie a|sky sport italia|italy|italia/.test(n))c='🇮🇹 إيطاليا';
+        else if(/bundesliga|germany|deutsch/.test(n))c='🇩🇪 ألمانيا';
+        else if(/canal|ligue 1|france/.test(n))c='🇫🇷 فرنسا';
+        else if(/sport tv|portugal/.test(n))c='🇵🇹 البرتغال';
+        else if(/espn|fox sports|tudn|univision|usa|america/.test(n))c='🌎 الأمريكتان';
+        else if(/tsn|sportsnet|rds|canada/.test(n))c='🇨🇦 كندا';
+        else if(/superSport|africa|dstv/.test(n))c='🌍 أفريقيا';
+        else if(/star sports|sony|india|asia/.test(n))c='🌏 آسيا';
+        if(!groups.has(c))groups.set(c,[]);
+        groups.get(c).push(ch);
+    });
+    let out='';
+    for(const [country,list] of groups){
+        out+=`<div class="broadcast-country">${country}</div><div class="broadcast-grid">`;
+        out+=list.map(ch=>`<button type="button" class="broadcast-card" onclick="playChannel(${Number(ch.id)},null)">
+            ${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)}</span></button>`).join('');
+        out+='</div>';
+    }
+    box.innerHTML=out||'<div class="matches-note">لا توجد قنوات مطابقة للبحث.</div>';
+    const count=document.getElementById('channelCount');
+    if(count)count.textContent=`${filtered.length} قناة`;
+}
+function filterMatchChannels(){
+    const i=document.getElementById('matchChannelSearch');
+    kikonChannelFilter=i?i.value:'';
+    renderMatchChannels();
+}
+function clearMatchChannels(){
+    const i=document.getElementById('matchChannelSearch'); if(i)i.value='';
+    kikonChannelFilter='';
+    renderMatchChannels();
+}
+
 </script>
-</body>
+<style>#kMatchControls{margin:12px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}.k-match-search{flex:1;min-width:260px}.k-match-search input{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:var(--card,#111827);color:inherit}.k-qtabs{display:flex;gap:7px;flex-wrap:wrap}.k-qtab{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:inherit;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:700}.k-qtab.active{background:#16a34a;color:#fff;border-color:#16a34a}.k-empty{padding:25px;text-align:center;opacity:.75}</style><script>
+/* ===== KIKON V3 enhancements ===== */
+let kMatchFilter='all', kMatchSearch='';
+const KIKON_CACHE_KEY='kikon_matches_cache_v3', KIKON_CACHE_TTL=180000;
+let kPollingTimer=null;
+
+function kLocalMatchTime(iso){
+  try{return new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso))}
+  catch(e){return '--:--'}
+}
+function kLocalMatchDate(iso){
+  try{return new Intl.DateTimeFormat(undefined,{weekday:'short',day:'2-digit',month:'2-digit'}).format(new Date(iso))}
+  catch(e){return ''}
+}
+function kMatchStatus(f){
+ const s=String(f.fixture?.status?.short||'');
+ if(kFixtureLive(f)) return 'live';
+ if(['FT','AET','PEN'].includes(s)) return 'finished';
+ return 'upcoming';
+}
+function kMatchSearchText(f){
+ return [f.teams?.home?.name,f.teams?.away?.name,f.league?.name,f.league?.country,
+   ...(kFindChannels(f)||[]).map(c=>c.name)].filter(Boolean).join(' ').toLocaleLowerCase();
+}
+function kSearchScore(f,q){
+ const a=[f.teams?.home?.name,f.teams?.away?.name,f.league?.name,f.league?.country,
+   ...(kFindChannels(f)||[]).map(c=>c.name)].filter(Boolean).map(x=>String(x).toLocaleLowerCase());
+ let s=0;
+ for(const x of a){if(x===q)s=Math.max(s,100);else if(x.startsWith(q))s=Math.max(s,80);
+   else if(x.split(/\s+/).some(w=>w.startsWith(q)))s=Math.max(s,65);else if(x.includes(q))s=Math.max(s,40)}
+ return s;
+}
+function kMatchesFiltered(list){
+ const q=kMatchSearch.trim().toLocaleLowerCase();
+ return list.filter(f=>{
+   const st=kMatchStatus(f);
+   const ok=kMatchFilter==='all'||(kMatchFilter==='live'&&st==='live')||
+     (kMatchFilter==='upcoming'&&st==='upcoming')||(kMatchFilter==='finished'&&st==='finished');
+   return ok&&(!q||kMatchSearchText(f).includes(q));
+ });
+}
+function kRenderQuickTabs(){
+ const h=document.getElementById('kMatchesTabs'); if(!h)return;
+ h.innerHTML=[['all','الكل'],['live','🔴 مباشر الآن'],['upcoming','لم تبدأ'],['finished','النتائج النهائية']]
+ .map(x=>`<button class="k-qtab ${kMatchFilter===x[0]?'active':''}" onclick="kSetMatchFilter('${x[0]}')">${x[1]}</button>`).join('');
+}
+function kSetMatchFilter(v){kMatchFilter=v;kRenderQuickTabs();kRenderMatchesV3()}
+function kSetMatchSearch(v){kMatchSearch=v||'';kRenderMatchesV3()}
+function kRenderMatchesV3(){
+ const host=document.getElementById('kMatches'); if(!host)return;
+ let list=kMatchesFiltered(kikonMatchesCache||[]);
+ if(kMatchSearch.trim()) list.sort((a,b)=>kSearchScore(b,kMatchSearch.trim().toLocaleLowerCase())-kSearchScore(a,kMatchSearch.trim().toLocaleLowerCase()));
+ else{
+   const live=list.filter(kFixtureLive);
+   const upcoming=list.filter(f=>!kFixtureLive(f)&&!['FT','AET','PEN'].includes(String(f.fixture?.status?.short||'')));
+   const finished=list.filter(f=>['FT','AET','PEN'].includes(String(f.fixture?.status?.short||'')));
+   live.sort((a,b)=>kLeagueScore(b)-kLeagueScore(a)||kCountryScore(b)-kCountryScore(a));
+   upcoming.sort((a,b)=>new Date(a.fixture?.date||0)-new Date(b.fixture?.date||0));
+   finished.sort((a,b)=>new Date(b.fixture?.date||0)-new Date(a.fixture?.date||0));
+   list=[...live,...upcoming,...finished];
+ }
+ host.innerHTML=list.length?list.map(kMatchCard).join(''):'<div class="k-empty">لا توجد مباريات مطابقة.</div>';
+}
+function kEnsureMatchUI(){
+ const root=document.getElementById('kMatches'); if(!root)return;
+ if(!document.getElementById('kMatchControls')){
+   const c=document.createElement('div'); c.id='kMatchControls';
+   c.innerHTML='<div class="k-match-search"><input id="kMatchSearchInput" type="search" placeholder="ابحث عن مباراة، فريق، بطولة أو قناة..." oninput="kSetMatchSearch(this.value)"></div><div id="kMatchesTabs" class="k-qtabs"></div>';
+   root.parentNode.insertBefore(c,root);
+ }
+ kRenderQuickTabs();
+}
+function kSaveMatchesCache(list){try{localStorage.setItem(KIKON_CACHE_KEY,JSON.stringify({ts:Date.now(),data:list}))}catch(e){}}
+function kLoadMatchesCache(){
+ try{const o=JSON.parse(localStorage.getItem(KIKON_CACHE_KEY)||'null');return o&&Array.isArray(o.data)&&Date.now()-o.ts<=KIKON_CACHE_TTL?o.data:null}catch(e){return null}
+}
+function kBootCachedMatches(){
+ const c=kLoadMatchesCache(); if(c){kikonMatchesCache=c;kEnsureMatchUI();kRenderMatchesV3()}
+}
+function kStartSmartPolling(){
+ if(kPollingTimer)clearTimeout(kPollingTimer);
+ const delay=(kikonMatchesCache||[]).some(kFixtureLive)?45000:120000;
+ kPollingTimer=setTimeout(async()=>{try{
+   if(typeof loadKikonMatches==='function')await loadKikonMatches();
+   kSaveMatchesCache(kikonMatchesCache||[]);kEnsureMatchUI();kRenderMatchesV3();
+ }finally{kStartSmartPolling()}},delay);
+}
+document.addEventListener('DOMContentLoaded',()=>{kBootCachedMatches();kEnsureMatchUI();setTimeout(kStartSmartPolling,1000)});
+/* Keep cinema/player session alive: clicking close must not stop the current player or navigate away. */
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-cinema-close],.cinema-close,#cinemaClose,.close-cinema');
+ if(!b)return;e.preventDefault();e.stopPropagation();
+ const o=b.closest('.cinema-overlay,.cinema-modal'); if(o)o.classList.remove('open','active','show');
+},true);
+</script></body>
 </html>
