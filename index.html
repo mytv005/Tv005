@@ -179,6 +179,8 @@
 .match-cinema button{position:absolute;top:5px;left:5px;z-index:20;background:rgba(0,0,0,.8);color:#fff;border:1px solid #475569;border-radius:5px;padding:4px 7px;cursor:pointer}
 .match-cinema-text{color:#fff;text-align:center;padding:15px;font-size:.72rem}
 .matches-channels-box{margin-top:14px;border-top:2px solid #334155;padding-top:8px}
+.player-media-hint{position:absolute;top:10px;right:12px;z-index:5;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.15);padding:6px 10px;border-radius:10px;font-size:.78rem;color:#e5e7eb;pointer-events:none}
+.kikon-rights-packs{margin:12px 0 18px!important}
 .channels-tools{display:flex;gap:6px;align-items:center;margin:6px 0}
 .channels-tools input{flex:1;background:#111827;color:#fff;border:1px solid #475569;border-radius:7px;padding:7px 9px;font-size:.72rem}
 .channels-tools button{background:#1e293b;color:#fff;border:1px solid #475569;border-radius:7px;padding:7px 10px;cursor:pointer}
@@ -190,6 +192,21 @@
 @media(max-width:1150px){.matches-row{grid-template-columns:repeat(3,minmax(0,1fr))}.broadcast-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:700px){.matches-row{grid-template-columns:repeat(2,minmax(0,1fr))}.broadcast-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:460px){.matches-row,.broadcast-grid{grid-template-columns:1fr}}
+
+.match-channel-unavailable{cursor:default;opacity:.72;border-style:dashed}.match-channel-rights{border-color:#22c55e}.match-channel-unavailable span{white-space:normal}.k-qtabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.k-qtabs button{cursor:pointer;border:1px solid #475569;background:#1e293b;color:#fff;border-radius:7px;padding:6px 9px}.k-qtabs button.active{outline:2px solid #16a34a}
+.k-qtabs button[onclick*="uefa"]{font-weight:900}
+
+/* KIKON PROFESSIONAL RIGHTS PACKS */
+.kikon-rights-packs{margin-top:22px;padding:18px;border-top:1px solid #243044;background:linear-gradient(180deg,#0b1220,#0a101b);border-radius:16px}
+.kikon-rights-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.kikon-rights-head h2{margin:0;font-size:1.15rem}.kikon-rights-head p{margin:4px 0 0;color:#94a3b8;font-size:.78rem}
+.kikon-rights-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.kikon-rights-tools input{flex:1;min-width:220px}
+.kikon-pack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.kikon-pack{border:1px solid #263348;background:#0d1625;border-radius:14px;padding:13px;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.kikon-pack-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.kikon-pack-name{font-weight:900;font-size:1rem}.kikon-pack-count{font-size:.7rem;color:#cbd5e1;background:#162235;padding:4px 7px;border-radius:999px}
+.kikon-pack-channels{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.kikon-pack-channel{display:inline-flex;align-items:center;gap:5px;border:1px solid #334155;background:#111c2e;color:#e2e8f0;border-radius:9px;padding:6px 8px;font-size:.72rem;cursor:pointer}.kikon-pack-channel:hover{border-color:#64748b;transform:translateY(-1px)}
+.kikon-pack-rights{display:flex;flex-wrap:wrap;gap:5px}.kikon-right-chip{font-size:.67rem;color:#a5f3fc;background:#0b2530;border:1px solid #164e63;padding:4px 7px;border-radius:999px}.kikon-pack-empty{padding:18px;text-align:center;color:#94a3b8}
+.kikon-rights-note{margin-top:12px;color:#64748b;font-size:.68rem;line-height:1.6}
 
 </style>
 
@@ -216,8 +233,10 @@
     <div id="loader"><div style="border:3px solid #fff; border-top:3px solid var(--primary); border-radius:50%; width:30px; height:30px; animation: spin 0.8s linear infinite;"></div></div>
     
     <div class="kikon-shield">KiKON-tv ULTRA</div>
-    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; encrypted-media" referrerpolicy="no-referrer"></iframe>
+    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"></iframe>
     
+    <div id="playerMediaHint" class="player-media-hint">🔊 الصوت والفيديو من مصدر البث الأصلي</div>
+
     <div class="player-controls">
         <div class="control-group">
             <button class="ctrl-btn" tabindex="0" onclick="prevChannel()">⏮️ السابق</button>
@@ -261,24 +280,122 @@
                         <span>جاري تجهيز المباريات...</span>
                     </div>
                 </div>
-                <div class="matches-channels-box">
-                    <div class="matches-head" style="margin-bottom:4px">
-                        <h2>📺 القنوات والباقات الموجودة في الملف</h2>
-                        <div class="matches-status" id="channelCount"></div>
+                <section class="kikon-rights-packs" id="kikonRightsPacks">
+                  <div class="kikon-rights-head">
+                    <div>
+                      <h2>📦 باقات الحقوق والقنوات الرياضية</h2>
+                      <p>تجميع احترافي للقنوات الموجودة فعلياً في الملف والمرتبطة بحقوق الدوريات والبطولات.</p>
                     </div>
-                    <div class="channels-tools">
-                        <input id="matchChannelSearch" type="search" placeholder="🔎 ابحث عن قناة أو باقة...">
-                        <button type="button" onclick="filterMatchChannels()">بحث</button>
-                        <button type="button" onclick="clearMatchChannels()">✕</button>
-                    </div>
-                    <div id="matchChannelsList"></div>
-                </div>
+                    <div class="matches-status" id="rightsPackCount"></div>
+                  </div>
+                  <div class="kikon-rights-tools">
+                    <input id="rightsPackSearch" type="search" placeholder="🔎 ابحث عن باقة، قناة أو بطولة..." oninput="renderKikonRightsPacks(this.value)">
+                  </div>
+                  <div id="kikonRightsPacksList" class="kikon-pack-grid"></div>
+                  <div class="kikon-rights-note">المحتوى هنا مستخرج من قواعد القنوات وحقوق البطولات الموجودة في ملفات المشروع. لا تتم إضافة قناة غير موجودة في قائمة القنوات المحلية.</div>
+                </section>
+
             </div>
         </div>
     </div>
 </div>
 
 <script>
+/* WEEKLY_SCHEDULE_MERGED_START */
+const KIKON_SOURCE_SCHEDULE = [{"date":"2026-08-17","league":"LaLiga","home":"Deportivo A Coruña","away":"Elche","time":"20:00","time_fr":"20:00","channels":["DAZN 1 (FR)","DAZN.com (FR)","Disney+ (FR)"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-17","league":"Championship","home":"Cardiff","away":"Wrexham","time":"20:00","time_fr":"20:00","channels":["beIN Sports MAX 4 (FR)"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-17","league":"Coppa Italia 32ème de finale","home":"Palermo","away":"Lecce","time":"20:15","time_fr":"20:15","channels":["DAZN.com (FR)"],"time_gmt1":"19:15","day_shift_gmt1":0},{"date":"2026-08-17","league":"Liga Portugal","home":"Casa Pia AC","away":"Benfica","time":"20:15","time_fr":"20:15","channels":["beIN Sports 2 (FR)"],"time_gmt1":"19:15","day_shift_gmt1":0},{"date":"2026-08-18","league":"National League North","home":"Brackley Town","away":"King's Lynn Town","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-18","league":"National League North","home":"Morecambe","away":"South Shields","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-18","league":"National League North","home":"Torquay United","away":"Weston Super Mare","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-18","league":"National League North","home":"Walton and Hersham","away":"Dagenham & Redbridge","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-18","league":"Champions League Qualification Finale","home":"Dinamo Zagreb","away":"Viking","time":"20:00","time_fr":"20:00","channels":["Canal+ Foot","myCANAL"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-18","league":"Champions League Qualification Finale","home":"Fenerbahçe","away":"Lyon","time":"20:00","time_fr":"20:00","channels":["Canal+","myCANAL"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-18","league":"Champions League Qualification Finale","home":"Levski Sofia","away":"AEK Athens","time":"20:00","time_fr":"20:00","channels":["Canal+ Sport","myCANAL"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-19","league":"LaLiga","home":"Atletico Madrid","away":"Malaga","time":"20:00","time_fr":"20:00","channels":["DAZN 1 (FR)","DAZN.com (FR)","Disney+ (FR)"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"Columbus","away":"Montreal","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-20","league":"Major League Soccer","home":"DC United","away":"New England","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-20","league":"Major League Soccer","home":"Cincinnati","away":"NYCFC","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-20","league":"Major League Soccer","home":"Orlando","away":"Chicago","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-20","league":"Major League Soccer","home":"Philadelphia","away":"Inter Miami CF","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-20","league":"Major League Soccer","home":"NY Red Bulls","away":"Nashville SC","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-20","league":"Major League Soccer","home":"Toronto","away":"Charlotte FC","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-20","league":"Major League Soccer","home":"Sporting KC","away":"St. Louis City","time":"01:00","time_fr":"01:00","channels":["Apple TV (FR)"],"time_gmt1":"00:00","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"Minnesota","away":"Atlanta United","time":"01:30","time_fr":"01:30","channels":["Apple TV (FR)"],"time_gmt1":"00:30","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"Colorado","away":"LAFC","time":"02:30","time_fr":"02:30","channels":["Apple TV (FR)"],"time_gmt1":"01:30","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"Salt Lake","away":"Dallas","time":"02:30","time_fr":"02:30","channels":["Apple TV (FR)"],"time_gmt1":"01:30","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"Seattle Sounders","away":"Austin FC","time":"02:30","time_fr":"02:30","channels":["Apple TV (FR)"],"time_gmt1":"01:30","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"LA Galaxy","away":"San Jose","time":"03:30","time_fr":"03:30","channels":["Apple TV (FR)"],"time_gmt1":"02:30","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"Portland","away":"San Diego FC","time":"03:30","time_fr":"03:30","channels":["Apple TV (FR)"],"time_gmt1":"02:30","day_shift_gmt1":0},{"date":"2026-08-20","league":"Major League Soccer","home":"Vancouver","away":"Houston","time":"03:30","time_fr":"03:30","channels":["Apple TV (FR)"],"time_gmt1":"02:30","day_shift_gmt1":0},{"date":"2026-08-20","league":"Conference League Qualification Finale","home":"Górnik Zabrze","away":"Monaco","time":"19:00","time_fr":"19:00","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-20","league":"Saudi Pro League","home":"Al-Fayha","away":"Al Hilal","time":"19:00","time_fr":"19:00","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"Bourg en Bresse Peronnas","away":"Thionville Lusitanos","time":"19:45","time_fr":"19:45","channels":["Ligue 1+"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"Caen","away":"SC Aubagne Air Bel","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"Concarneau","away":"Villefranche Beaujolais","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"FC Fleury 91","away":"Orléans","time":"19:45","time_fr":"19:45","channels":["Ligue 1+"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"La Roche VF","away":"Cannes","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"Le Puy","away":"Amiens","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"Rouen","away":"Quevilly","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"Ligue 3","home":"SC Bastia","away":"Versailles","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)","Ligue 1+"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-20","league":"LaLiga","home":"Rayo Vallecano","away":"Deportivo Alaves","time":"20:00","time_fr":"20:00","channels":["DAZN 1 (FR)","DAZN.com (FR)","Disney+ (FR)"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"DFB Pokal","home":"DJK Teutonia St. Tönis","away":"Frankfurt","time":"17:00","time_fr":"17:00","channels":["beIN Sports 2 (FR)"],"time_gmt1":"16:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Saudi Pro League","home":"Al Riyadh","away":"Al Nassr FC","time":"17:00","time_fr":"17:00","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"16:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Frauen-Bundesliga","home":"Union Berlin (W)","away":"Bayern München (W)","time":"17:20","time_fr":"17:20","channels":["DAZN.com (FR)"],"time_gmt1":"16:20","day_shift_gmt1":0},{"date":"2026-08-21","league":"Ligue 2","home":"Boulogne","away":"Red Star","time":"19:00","time_fr":"19:00","channels":["beIN Sports MAX 4 (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Ligue 2","home":"Clermont Foot","away":"Dijon","time":"19:00","time_fr":"19:00","channels":["beIN Sports MAX 5 (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Ligue 2","home":"Dunkerque","away":"Montpellier","time":"19:00","time_fr":"19:00","channels":["beIN Sports MAX 6 (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Ligue 2","home":"Pau","away":"Nancy","time":"19:00","time_fr":"19:00","channels":["beIN Sports MAX 7 (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Ligue 2","home":"Sochaux","away":"Guingamp","time":"19:00","time_fr":"19:00","channels":["beIN Sports MAX 8 (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Saudi Pro League","home":"Al Qadsiah","away":"Al Ittihad","time":"19:00","time_fr":"19:00","channels":["DAZN.com (FR)","DAZN 1 (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"Super Lig","home":"Erzurumspor FK","away":"Galatasaray","time":"19:30","time_fr":"19:30","channels":["beIN Sports 2 (FR)"],"time_gmt1":"18:30","day_shift_gmt1":0},{"date":"2026-08-21","league":"Ligue 1","home":"Marseille","away":"Strasbourg","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)","Ligue 1+"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-21","league":"DFB Pokal","home":"Hansa Rostock","away":"VfB Stuttgart","time":"19:45","time_fr":"19:45","channels":["beIN Sports MAX 9 (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-21","league":"Premier League","home":"Arsenal","away":"Coventry","time":"20:00","time_fr":"20:00","channels":["Canal+ Foot","Canal+","myCANAL"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-21","league":"LaLiga","home":"Real Betis","away":"Real Sociedad","time":"20:00","time_fr":"20:00","channels":["DAZN.com (FR)","Disney+ (FR)","DAZN 1 (FR)"],"time_gmt1":"19:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Frauen-Bundesliga","home":"Eintracht Frankfurt (W)","away":"FC Köln (W)","time":"11:00","time_fr":"11:00","channels":["DAZN.com (FR)"],"time_gmt1":"10:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"DFB Pokal","home":"Wehen Wiesbaden","away":"Leverkusen","time":"12:00","time_fr":"12:00","channels":["beIN Sports 3 (FR)"],"time_gmt1":"11:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Premier League","home":"Hull","away":"Man United","time":"12:30","time_fr":"12:30","channels":["myCANAL","Canal+ Foot","Canal+"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Championship","home":"Lincoln","away":"Portsmouth","time":"12:30","time_fr":"12:30","channels":["beIN Sports MAX 4 (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Boston United","away":"Altrincham","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Carlisle","away":"Hornchurch","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Eastleigh","away":"Scunthorpe","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"FC Halifax Town","away":"Tamworth","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Forest Green","away":"Boreham Wood","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Harrogate Town","away":"Barrow","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Kidderminster Harriers","away":"Aldershot Town","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Solihull Moors","away":"Southend","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Sutton United","away":"Hartlepool United","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Woking","away":"AFC Fylde","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Worthing","away":"Wealdstone","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League","home":"Yeovil","away":"Gateshead FC","time":"12:30","time_fr":"12:30","channels":["DAZN.com (FR)"],"time_gmt1":"11:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 2","home":"Metz","away":"Laval","time":"13:00","time_fr":"13:00","channels":["beIN Sports 2 (FR)"],"time_gmt1":"12:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 2","home":"Nantes","away":"Rodez","time":"13:00","time_fr":"13:00","channels":["beIN Sports 1 (FR)"],"time_gmt1":"12:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"DFB Pokal","home":"Saarbrücken","away":"Hertha BSC","time":"14:30","time_fr":"14:30","channels":["RTL Television (FR)"],"time_gmt1":"13:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Premier League","home":"Everton","away":"Crystal Palace","time":"15:00","time_fr":"15:00","channels":["myCANAL","Canal+ Foot","Canal+ Live 3","Canal+ Live 2"],"time_gmt1":"14:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Premier League","home":"Ipswich","away":"Sunderland","time":"15:00","time_fr":"15:00","channels":["myCANAL","Canal+ Live 4"],"time_gmt1":"14:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Premier League","home":"Nottm Forest","away":"Leeds","time":"15:00","time_fr":"15:00","channels":["Canal+ Live 3","myCANAL","Canal+ Live 2"],"time_gmt1":"14:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Championship","home":"West Ham","away":"Charlton","time":"15:00","time_fr":"15:00","channels":["beIN Sports MAX 4 (FR)"],"time_gmt1":"14:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"National League South","home":"Dagenham & Redbridge","away":"Torquay United","time":"15:00","time_fr":"15:00","channels":["DAZN.com (FR)"],"time_gmt1":"14:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Eredivisie","home":"Fortuna Sittard","away":"AZ Alkmaar","time":"15:30","time_fr":"15:30","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"14:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"LaLiga","home":"Athletic Club","away":"Sevilla","time":"16:00","time_fr":"16:00","channels":["DAZN.com (FR)"],"time_gmt1":"15:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 1","home":"Lens","away":"Auxerre","time":"16:15","time_fr":"16:15","channels":["DAZN.com (FR)","Ligue 1+"],"time_gmt1":"15:15","day_shift_gmt1":0},{"date":"2026-08-22","league":"Saudi Pro League","home":"Al Fateh FC","away":"Al-Ettifaq","time":"16:45","time_fr":"16:45","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"15:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"DFB Pokal","home":"Eintracht Trier","away":"RB Leipzig","time":"17:00","time_fr":"17:00","channels":["beIN Sports 2 (FR)"],"time_gmt1":"16:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Belgian Pro League","home":"Sporting Charleroi","away":"KV Mechelen","time":"17:15","time_fr":"17:15","channels":["DAZN.com (FR)"],"time_gmt1":"16:15","day_shift_gmt1":0},{"date":"2026-08-22","league":"Premier League","home":"Brentford","away":"Tottenham","time":"17:30","time_fr":"17:30","channels":["Canal+","Canal+ Foot","myCANAL"],"time_gmt1":"16:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Serie A","home":"Inter","away":"Monza","time":"17:30","time_fr":"17:30","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"16:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Serie A","home":"Udinese","away":"Como","time":"17:30","time_fr":"17:30","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"16:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"LaLiga","home":"Valencia","away":"Celta Vigo","time":"18:30","time_fr":"18:30","channels":["DAZN.com (FR)"],"time_gmt1":"17:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 2","home":"Saint-Etienne","away":"Grenoble","time":"19:00","time_fr":"19:00","channels":["beIN Sports 1 (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Saudi Pro League","home":"Al Ahli","away":"Abha","time":"19:00","time_fr":"19:00","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"18:00","day_shift_gmt1":0},{"date":"2026-08-22","league":"Super Cup Finale","home":"Dortmund","away":"Bayern München","time":"19:30","time_fr":"19:30","channels":["beIN Sports 2 (FR)"],"time_gmt1":"18:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Super Lig","home":"Fenerbahçe","away":"Konyaspor","time":"19:30","time_fr":"19:30","channels":["beIN Sports MAX 5 (FR)"],"time_gmt1":"18:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 1","home":"Le Mans","away":"Brest","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)","Ligue 1+"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 1","home":"Nice","away":"Lorient","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 1","home":"Toulouse","away":"Lyon","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"Ligue 1","home":"Troyes","away":"Paris FC","time":"19:45","time_fr":"19:45","channels":["Ligue 1+","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"Serie A","home":"Genoa","away":"Napoli","time":"19:45","time_fr":"19:45","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"Serie A","home":"Parma","away":"Cagliari","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)","DAZN 1 (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"Belgian Pro League","home":"Royal Antwerp","away":"Genk","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-22","league":"LaLiga","home":"Espanyol","away":"Real Madrid","time":"20:30","time_fr":"20:30","channels":["DAZN.com (FR)"],"time_gmt1":"19:30","day_shift_gmt1":0},{"date":"2026-08-22","league":"Liga Portugal","home":"Sporting CP","away":"Alverca","time":"20:30","time_fr":"20:30","channels":["beIN Sports MAX 6 (FR)"],"time_gmt1":"19:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"Montreal","away":"LA Galaxy","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-23","league":"Major League Soccer","home":"Charlotte FC","away":"DC United","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-23","league":"Major League Soccer","home":"Cincinnati","away":"Seattle Sounders","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-23","league":"Major League Soccer","home":"Inter Miami CF","away":"Toronto","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-23","league":"Major League Soccer","home":"Orlando","away":"Salt Lake","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-23","league":"Major League Soccer","home":"NY Red Bulls","away":"Chicago","time":"00:30","time_fr":"00:30","channels":["Apple TV (FR)"],"time_gmt1":"23:30","day_shift_gmt1":-1},{"date":"2026-08-23","league":"Major League Soccer","home":"Austin FC","away":"Philadelphia","time":"01:30","time_fr":"01:30","channels":["Apple TV (FR)"],"time_gmt1":"00:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"Nashville SC","away":"Columbus","time":"01:30","time_fr":"01:30","channels":["Apple TV (FR)"],"time_gmt1":"00:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"St. Louis City","away":"Houston","time":"01:30","time_fr":"01:30","channels":["Apple TV (FR)"],"time_gmt1":"00:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"Vancouver","away":"Dallas","time":"02:30","time_fr":"02:30","channels":["Apple TV (FR)"],"time_gmt1":"01:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"LAFC","away":"Portland","time":"03:30","time_fr":"03:30","channels":["Apple TV (FR)"],"time_gmt1":"02:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"San Diego FC","away":"Colorado","time":"03:30","time_fr":"03:30","channels":["Apple TV (FR)"],"time_gmt1":"02:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"San Jose","away":"Minnesota","time":"03:30","time_fr":"03:30","channels":["Apple TV (FR)"],"time_gmt1":"02:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Championship","home":"West Brom","away":"Burnley","time":"12:00","time_fr":"12:00","channels":["beIN Sports MAX 4 (FR)"],"time_gmt1":"11:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"Eredivisie","home":"PSV Eindhoven","away":"FC Groningen","time":"13:30","time_fr":"13:30","channels":["DAZN.com (FR)"],"time_gmt1":"12:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Ligue 1","home":"Angers","away":"Lille","time":"14:00","time_fr":"14:00","channels":["DAZN.com (FR)","Ligue 1+"],"time_gmt1":"13:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"Premier League","home":"Brighton","away":"Aston Villa","time":"14:00","time_fr":"14:00","channels":["myCANAL","Canal+ Live 1"],"time_gmt1":"13:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"Premier League","home":"Man City","away":"Bournemouth","time":"14:00","time_fr":"14:00","channels":["myCANAL","Canal+ Foot"],"time_gmt1":"13:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"Frauen-Bundesliga","home":"RB Leipzig (W)","away":"Bayer Leverkusen (W)","time":"15:00","time_fr":"15:00","channels":["DAZN.com (FR)"],"time_gmt1":"14:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"Eredivisie","home":"Cambuur","away":"Feyenoord","time":"15:45","time_fr":"15:45","channels":["DAZN.com (FR)"],"time_gmt1":"14:45","day_shift_gmt1":0},{"date":"2026-08-23","league":"LaLiga","home":"Atletico Madrid","away":"Villarreal","time":"16:00","time_fr":"16:00","channels":["DAZN.com (FR)"],"time_gmt1":"15:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"Ligue 1","home":"Le Havre","away":"Monaco","time":"16:15","time_fr":"16:15","channels":["DAZN.com (FR)","Ligue 1+"],"time_gmt1":"15:15","day_shift_gmt1":0},{"date":"2026-08-23","league":"Premier League","home":"Newcastle","away":"Liverpool","time":"16:30","time_fr":"16:30","channels":["Canal+","Canal+ Foot","myCANAL"],"time_gmt1":"15:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Super Lig","home":"Trabzonspor","away":"Başakşehir","time":"17:00","time_fr":"17:00","channels":["beIN Sports 1 (FR)"],"time_gmt1":"16:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"Serie A","home":"Frosinone","away":"Juventus","time":"17:30","time_fr":"17:30","channels":["DAZN.com (FR)","DAZN 1 (FR)"],"time_gmt1":"16:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Serie A","home":"Venezia","away":"Lecce","time":"17:30","time_fr":"17:30","channels":["DAZN.com (FR)","DAZN 1 (FR)"],"time_gmt1":"16:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Belgian Pro League","home":"Club Brugge","away":"Cercle Brugge","time":"17:30","time_fr":"17:30","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"16:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Liga Portugal","home":"Santa Clara","away":"Famalicao","time":"18:00","time_fr":"18:00","channels":["beIN Sports 3 (FR)"],"time_gmt1":"17:00","day_shift_gmt1":0},{"date":"2026-08-23","league":"LaLiga","home":"Getafe","away":"Racing Santander","time":"18:30","time_fr":"18:30","channels":["DAZN.com (FR)"],"time_gmt1":"17:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Super Lig","home":"Alanyaspor","away":"Beşiktaş","time":"19:30","time_fr":"19:30","channels":["beIN Sports 2 (FR)"],"time_gmt1":"18:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Ligue 1","home":"PSG","away":"Rennes","time":"19:45","time_fr":"19:45","channels":["DAZN.com (FR)","Ligue 1+"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-23","league":"Serie A","home":"Atalanta","away":"Sassuolo","time":"19:45","time_fr":"19:45","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-23","league":"Serie A","home":"Torino","away":"Milan","time":"19:45","time_fr":"19:45","channels":["DAZN 1 (FR)","DAZN.com (FR)"],"time_gmt1":"18:45","day_shift_gmt1":0},{"date":"2026-08-23","league":"LaLiga","home":"Elche","away":"Barcelona","time":"20:30","time_fr":"20:30","channels":["DAZN.com (FR)"],"time_gmt1":"19:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Liga Portugal","home":"FC Porto","away":"Arouca","time":"20:30","time_fr":"20:30","channels":["beIN Sports 1 (FR)"],"time_gmt1":"19:30","day_shift_gmt1":0},{"date":"2026-08-23","league":"Major League Soccer","home":"New England","away":"NYCFC","time":"21:30","time_fr":"21:30","channels":["Apple TV (FR)"],"time_gmt1":"20:30","day_shift_gmt1":0}];
+
+/* UEFA schedule imported from europe league.txt — source timezone GMT+1 Africa/Casablanca. */
+const KIKON_UEFA_SCHEDULE = [{"date":"2026-08-18","league":"UEFA Champions League - Play-Off (1st Leg)","home":"Dinamo Zagreb","away":"Viking","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Sports HD 4","Cosmote Sport 4 HD","Digi Sport 3 Romania","Max Sport 2 Bulgaria","TNT Sports 1 UK"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-18","league":"UEFA Champions League - Play-Off (1st Leg)","home":"Levski Sofia","away":"AEK Athens","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Sports MENA English 2","Canal+ Sport France","Cosmote Sport 2 HD","Digi Sport 2 Romania","Max Sport 3 Bulgaria"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-18","league":"UEFA Champions League - Play-Off (1st Leg)","home":"Fenerbahçe","away":"Lyon","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Sports MENA English 1","Canal+ France","Cosmote Sport 3 HD","Digi Sport 1 Romania","Max Sport 4 Bulgaria","Sport TV5 Portugal"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-19","league":"UEFA Champions League - Play-Off (1st Leg)","home":"Celtic","away":"LASK Linz","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Sports HD 2","beIN Sports MENA English 1","Canal+ Sport France","Canal+ Sport 2 Afrique","Cosmote Sport 3 HD","Digi Sport 2 Romania","Sport TV5 Portugal","TNT Sports 1 UK"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-19","league":"UEFA Champions League - Play-Off (1st Leg)","home":"NEC Nijmegen","away":"Bodø/Glimt","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Sports HD 5","Cosmote Sport 2 HD","Ring Bulgaria","TNT Sports 2 UK","Ziggo Sport NL"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-19","league":"UEFA Champions League - Play-Off (1st Leg)","home":"Slovan Bratislava","away":"Celje","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Sports HD 6","Cosmote Sport 4 HD","TNT Sports 4 UK"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-19","league":"UEFA Champions League - Play-Off (1st Leg) [Bucharest]","home":"Hapoel Be'er Sheva","away":"Sabah","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Sports MENA English 2","Cosmote Sport 4 HD","Digi Sport 4 Romania","TNT Sports 5 UK"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-25","league":"UEFA Champions League - Play-Off (2nd Leg)","home":"Sabah","away":"Hapoel Be'er Sheva","time":"17:45","time_gmt1":"17:45","time_fr":"17:45","channels":["beIN Connect MENA","DAZN Deutsch ($/geo/R)","Fast Sports [online] ($/geo/R)","HBO Max (uk only) [$/geo/R]","MTV Katsomon+ ($/geo/R)","Nova Sport 6 Czech HD","RTL+ Hungary [online]","SÝN Sport 2 Ísland HD","TNT Sports 2 HD","TV2 Play Norge ($/geo/R)","ViaPlay Danmark HD","ViaPlay Sverige HD","Voyo Player Slovakia [$]"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-25","league":"UEFA Champions League - Play-Off (2nd Leg)","home":"Bodø/Glimt","away":"NEC Nijmegen","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Connect MENA","DAZN Deutsch ($/geo/R)","Fast Sports [online] ($/geo/R)","HBO Max (uk only) [$/geo/R]","MTV Katsomon+ ($/geo/R)","MTV Urheilu 1 Suomi HD","Nova Sport 4 Czech HD","RTL+ Hungary [online]","SÝN Sport 2 Ísland HD","TNT Sports 1 HD","TV2 Play Norge ($/geo/R)","ViaPlay Danmark HD","ViaPlay Sverige HD","Voyo Player Slovakia [$]"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-25","league":"UEFA Champions League - Play-Off (2nd Leg)","home":"LASK Linz","away":"Celtic","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Connect MENA","Fast Sports [online] ($/geo/R)","MTV Katsomon+ ($/geo/R)","MTV Urheilu 3 Suomi HD","Nova Sport 3 Czech HD","Premier Sports 1 Ireland HD","Prime Video Deutsch [$]","Prime Video UK [$]","RTL+ Hungary [online]","TV2 Play Norge ($/geo/R)","ViaPlay Danmark HD","ViaPlay Sverige HD","ViaPlay Ísland HD","Voyo Player Slovakia [$]"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-26","league":"UEFA Champions League - Play-Off (2nd Leg)","home":"Lyon","away":"Fenerbahçe","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Connect MENA","DAZN Deutsch ($/geo/R)","Fast Sports [online] ($/geo/R)","HBO Max (uk only) [$/geo/R]","MTV Katsomon+ ($/geo/R)","MTV Urheilu 1 Suomi HD","Nova Sport 3 Czech HD","RTL+ Hungary [online]","TNT Sports 1 HD","TRT 1 Türkiye HD","TV2 Play Norge ($/geo/R)","ViaPlay Danmark HD","ViaPlay Sverige HD","Voyo Player Slovakia [$]"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-26","league":"UEFA Champions League - Play-Off (2nd Leg)","home":"Viking","away":"Dinamo Zagreb","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Connect MENA","DAZN Deutsch ($/geo/R)","Fast Sports [online] ($/geo/R)","HBO Max (uk only) [$/geo/R]","MTV Katsomon+ ($/geo/R)","MTV Urheilu 3 Suomi HD","RTL+ Hungary [online]","TNT Sports 2 HD","TV2 Play Norge ($/geo/R)","ViaPlay Danmark HD","ViaPlay Sverige HD"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-26","league":"UEFA Champions League - Play-Off (2nd Leg)","home":"AEK Athens","away":"Levski Sofia","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Connect MENA","bTV Bulgaria HD","DAZN Deutsch ($/geo/R)","Fast Sports [online] ($/geo/R)","HBO Max (uk only) [$/geo/R]","MTV Katsomon+ ($/geo/R)","MTV Urheilu 2 Suomi HD","Nova Sport 4 Czech HD","RTL+ Hungary [online]","TNT Sports 4 HD","TV2 Play Norge ($/geo/R)","ViaPlay Danmark HD","ViaPlay Sverige HD","Voyo Player Slovakia [$]"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"},{"date":"2026-08-26","league":"UEFA Champions League - Play-Off (2nd Leg)","home":"Celje","away":"Slovan Bratislava","time":"20:00","time_gmt1":"20:00","time_fr":"20:00","channels":["beIN Connect MENA","DAZN Deutsch ($/geo/R)","Fast Sports [online] ($/geo/R)","HBO Max (uk only) [$/geo/R]","MTV Katsomon+ ($/geo/R)","MTV MAX Suomi HD","Nova Sport 5 Czech HD","Nova Sport 5 Slovakia HD","RTL+ Hungary [online]","TNT Sports 5 HD","TV2 Play Norge ($/geo/R)","ViaPlay Danmark HD","ViaPlay Sverige HD","Voyo Player Slovakia [$]"],"time_source":"Africa/Casablanca GMT+1","source":"europe league.txt"}];
+/* WEEKLY_SCHEDULE_MERGED_END */
+
+
+/* ===== SOURCE TV SCHEDULE MERGE =====
+   مصدر الأسبوع المرسل من المستخدم: برنامج TV France.
+   هذا المصدر هو جدول المباريات المحلي المكتوب في ملفات المشروع.
+   القنوات تُعرض من الملف كما هي؛ وإذا تطابق اسمها مع قناة داخل التطبيق تصبح قابلة للضغط.
+   أوقات المصدر الفرنسي تُحوّل من Europe/Paris إلى Africa/Casablanca (GMT+1).
+*/
+function kSourceDateKey(tag, baseDate){
+  // الجدول المعتمد يغطّي الأسبوع 17 → 23 أغسطس 2026، والتاريخ محفوظ صراحةً لكل مباراة.
+  if(/^2026-08-\d{2}$/.test(tag)) return tag;
+  if(tag==='today') return '2026-08-17';
+  if(tag==='tomorrow') return '2026-08-18';
+  return tag;
+}
+function kSourceFixtureDate(rec, baseDate){
+  const key=kSourceDateKey(rec.date,baseDate);
+  let shift=Number(rec.day_shift_gmt1)||0;
+  const d=new Date(key+'T'+rec.time_gmt1+':00Z');
+  d.setUTCDate(d.getUTCDate()+shift);
+  // The stored string has no timezone because kMatchInstant intentionally treats
+  // bare timestamps as Morocco GMT+1.
+  const yy=d.getUTCFullYear(), mm=String(d.getUTCMonth()+1).padStart(2,'0'), dd=String(d.getUTCDate()).padStart(2,'0');
+  const hh=String(d.getUTCHours()).padStart(2,'0'), mi=String(d.getUTCMinutes()).padStart(2,'0');
+  return `${yy}-${mm}-${dd}T${hh}:${mi}:00`;
+}
+function kNormTeamName(v){
+  return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
+    .replace(/\(w\)$/,'').replace(/[^a-z0-9]+/g,' ').trim();
+}
+function kSourceScheduleFixtures(baseDate){
+  const out=[];
+  for(const rec of (KIKON_SOURCE_SCHEDULE||[])){
+    const dt=kSourceFixtureDate(rec,baseDate);
+    if(String(dt).slice(0,10)!==baseDate) continue;
+    out.push({
+      fixture:{id:-Math.abs(('tv_'+baseDate+'_'+rec.home+'_'+rec.away+'_'+rec.time_fr).split('').reduce((a,c)=>((a*31+c.charCodeAt(0))>>>0),7)),date:dt,
+        status:{short:'NS',long:'Not Started'},elapsed:null},
+      league:{id:0,name:rec.league,country:'France'},
+      teams:{home:{id:0,name:rec.home,logo:''},away:{id:0,name:rec.away,logo:''}},
+      goals:{home:null,away:null},
+      _source:'TV-France-weekly',_sourceEventId:'',_sourceTimeFrance:rec.time_fr,
+      _sourceChannels:Array.isArray(rec.channels)?rec.channels:[]
+    });
+  }
+  return out;
+}
+function kUEFAScheduleFixtures(filterMode='all'){
+  const rows=[];
+  const base=kikonDate();
+  const d=new Date(base+'T12:00:00Z');
+  const tomorrow=new Date(d); tomorrow.setUTCDate(tomorrow.getUTCDate()+1);
+  const tomorrowKey=tomorrow.toISOString().slice(0,10);
+  for(const rec of (KIKON_UEFA_SCHEDULE||[])){
+    if(filterMode==='today' && rec.date!==base) continue;
+    if(filterMode==='tomorrow' && rec.date!==tomorrowKey) continue;
+    const dt=`${rec.date}T${rec.time_gmt1}:00`;
+    rows.push({
+      fixture:{id:-Math.abs(('uefa_'+rec.date+'_'+rec.home+'_'+rec.away+'_'+rec.time).split('').reduce((a,c)=>((a*31+c.charCodeAt(0))>>>0),19)),date:dt,status:{short:'NS',long:'Not Started'},elapsed:null},
+      league:{id:0,name:rec.league,country:'Europe'},
+      teams:{home:{id:0,name:rec.home,logo:''},away:{id:0,name:rec.away,logo:''}},
+      goals:{home:null,away:null},
+      _source:'UEFA-file',_sourceEventId:'',_sourceTimeFrance:rec.time,_sourceChannels:Array.isArray(rec.channels)?rec.channels:[],
+      _sourceTimezone:'Africa/Casablanca GMT+1'
+    });
+  }
+  return rows.sort((a,b)=>kMatchInstant(a.fixture.date)-kMatchInstant(b.fixture.date));
+}
+
+function kMergeSourceSchedule(fixtures,baseDate){
+  const source=kSourceScheduleFixtures(baseDate);
+  return source.sort((a,b)=>String(a.fixture.date).localeCompare(String(b.fixture.date)));
+}
+function kDedupFixtures(list){
+  const seen=new Set(), out=[];
+  for(const f of (Array.isArray(list)?list:[])){
+    const id=Number(f?.fixture?.id||0);
+    const key=id || [
+      f?.fixture?.date||'',
+      f?.teams?.home?.id||f?.teams?.home?.name||'',
+      f?.teams?.away?.id||f?.teams?.away?.name||''
+    ].join('|');
+    if(seen.has(key)) continue;
+    seen.add(key);
+    out.push(f);
+  }
+  return out;
+}
+
 const SECRET_PIN = "1986";
 let viewMode = 'channels';
 let isUnlockedThisSession = false;
@@ -505,7 +622,22 @@ function switchView(mode) {
         // إبقاء الباقات والقنوات الأصلية ظاهرة في اليسار/الجانب.
         document.getElementById('side').style.display = 'flex';
         renderMatchChannels();
-        loadKikonMatches();
+        const matchesBox=document.getElementById('matchesList');
+        if(matchesBox && !kikonMatchesCache.length){
+            matchesBox.innerHTML='<div class="matches-placeholder"><span style="font-size:2rem;">⚽</span><span>جاري جلب مباريات اليوم...</span></div>';
+        }
+        kSetMatchesStatus('⏳ جاري جلب مباريات اليوم...');
+        loadKikonMatches(false).catch(err=>{
+            console.error('KIKON matches load:',err);
+            kSetMatchesStatus('⚠️ تعذر جلب المباريات، سيتم استعمال البيانات المحفوظة عند توفرها.');
+            const c=kLoadMatchesCache(true);
+            if(c && c.date===kikonDate() && c.data.length){
+                kikonMatchesCache=kNormalizeFixtures(c.data);
+                kRenderMatchesV3();
+            }else if(matchesBox && !kikonMatchesCache.length){
+                matchesBox.innerHTML='<div class="matches-error">⚠️ تعذر جلب المباريات الآن. حاول تحديث الصفحة.</div>';
+            }
+        });
     }
 }
 
@@ -591,12 +723,17 @@ function renderGrid(list) {
 function playChannel(id, el) {
     document.querySelectorAll('.ch-card').forEach(c => c.classList.remove('active'));
     if(el) el.classList.add('active');
+    const nextSrc = "https://dlhd.st/embed/stream-" + id + ".php";
+    if (player.src === nextSrc || player.getAttribute('src') === nextSrc) {
+        playPauseBtn.innerText = "⏸️ إيقاف";
+        return;
+    }
     loader.style.display = 'flex';
-    savedSrc = "https://dlhd.st/embed/stream-" + id + ".php";
+    savedSrc = nextSrc;
     localStorage.setItem('kikon_last_src', savedSrc);
     player.src = savedSrc;
     playPauseBtn.innerText = "⏸️ إيقاف";
-    setTimeout(() => { loader.style.display = 'none'; }, 800);
+    setTimeout(() => { loader.style.display = 'none'; }, 1200);
 }
 
 function togglePlayPause() {
@@ -664,11 +801,13 @@ window.onload = init;
    لا نستخدم مشغل فيديو جديد. عند اختيار قناة ناقلة نستعمل
    playChannel() الأصلي الموجود في الملف.
    ========================================================= */
-const KIKON_FOOTBALL_KEY = '0a2ad8b2734fa15e918507f673ab0c64';
-const KIKON_FOOTBALL_BASE = 'https://v3.football.api-sports.io';
+/* LOCAL FILES ONLY — لا API ولا fetch خارجي للمباريات */
+const KIKON_FOOTBALL_KEY = '';
+const KIKON_FOOTBALL_BASE = '';
 let kikonMatchesCache = [];
 let kikonMatchesTimer = null;
 let kikonChannelFilter = '';
+let kWeeklyReportMode = 'today'; // التقرير الأسبوعي: اليوم / غداً / طيلة الأسبوع
 
 function kikonDate() {
     return new Intl.DateTimeFormat('en-CA', {
@@ -701,9 +840,54 @@ function kStatus(s) {
     const m={NS:'لم تبدأ',TBD:'لم يحدد','1H':'الشوط الأول',HT:'استراحة','2H':'الشوط الثاني',ET:'وقت إضافي',BT:'ركلات ترجيح',FT:'انتهت',AET:'انتهت بعد الإضافي',PEN:'ركلات الترجيح',PST:'مؤجلة',CANC:'ملغاة',SUSP:'موقوفة'};
     return m[s] || s || '';
 }
-function kTime(iso) {
-    try { return new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso)); }
-    catch(e){ return '--:--'; }
+const KIKON_DISPLAY_TZ='Africa/Casablanca';
+const KIKON_GMT1_OFFSET_MS=60*60*1000;
+
+function kMatchInstant(iso){
+    const s=String(iso||'').trim();
+    if(!s) return NaN;
+
+    if(/[zZ]$|[+-]\d{2}:\d{2}$/.test(s)){
+        const t=Date.parse(s);
+        return Number.isFinite(t)?t:NaN;
+    }
+
+    const m=s.match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/);
+    if(m){
+        const y=Number(m[1]), mo=Number(m[2])-1, d=Number(m[3]);
+        const h=Number(m[4]), mi=Number(m[5]), sec=Number(m[6]||0);
+        const ms=Number(('0.'+(m[7]||'0')))*1000;
+        return Date.UTC(y,mo,d,h,mi,sec,ms)-KIKON_GMT1_OFFSET_MS;
+    }
+
+    const t=Date.parse(s);
+    return Number.isFinite(t)?t:NaN;
+}
+
+function kTime(iso){
+    try{
+        const t=kMatchInstant(iso);
+        if(!Number.isFinite(t)) return '--:--';
+        return new Intl.DateTimeFormat('en-GB',{
+            timeZone:KIKON_DISPLAY_TZ,
+            hour:'2-digit',
+            minute:'2-digit',
+            hour12:false
+        }).format(new Date(t));
+    }catch(e){ return '--:--'; }
+}
+
+function kEffectiveStatus(f){
+    const raw=String(f?.fixture?.status?.short||'').toUpperCase();
+    if(!['NS','TBD'].includes(raw)) return raw;
+
+    const start=kMatchInstant(f?.fixture?.date);
+    if(!Number.isFinite(start)) return raw;
+
+    const diff=Date.now()-start;
+    if(diff>=0 && diff<=150*60*1000) return 'LIVE';
+    if(diff>150*60*1000) return 'FT';
+    return raw;
 }
 
 function kChannelCatalog() {
@@ -712,43 +896,165 @@ function kChannelCatalog() {
     return out;
 }
 
-/* مطابقة آمنة للقنوات الموجودة فعلياً في channelsData.
-   لا نقول إن القناة رسمياً ناقلة إلا إذا قدم API بيانات broadcast صريحة. */
-function kFindChannels(fixture) {
-    const all=kChannelCatalog();
-    const league=String(fixture.league?.name||'').toLowerCase();
-    const country=String(fixture.league?.country||'').toLowerCase();
-    const keys=[];
-    const add=(arr)=>arr.forEach(x=>keys.push(String(x).toLowerCase()));
+/* =========================================================
+   KIKON V7 — STRICT BROADCAST CHANNEL RESOLVER
+   مهم:
+   - لا نخمن القناة من الدولة أو اسم البطولة.
+   - لا نكرر beIN/ESPN/Sky وغيرها لمجرد وجود كلمة مشتركة.
+   - نعرض فقط القناة التي تعود من API وتطابق قناة موجودة فعلاً
+     في channelsData.
+   - إذا لم تُرجع API بيانات ناقل، لا نضع قناة خاطئة داخل البطاقة.
+   ========================================================= */
 
-    if(/england|premier league|championship|fa cup|efl/.test(league+' '+country)) add(['tnt sports','sky sports','bein sports','premier sports']);
-    else if(/spain|laliga|copa del rey|segunda/.test(league+' '+country)) add(['laliga','movistar','bein sports','espn']);
-    else if(/italy|serie a|coppa italia/.test(league+' '+country)) add(['serie a','sky sport','dazn','bein sports']);
-    else if(/france|ligue 1|coupe de france/.test(league+' '+country)) add(['canal+','bein sports','dazn']);
-    else if(/germany|bundesliga|dfb/.test(league+' '+country)) add(['bundesliga','sky sport','dazn']);
-    else if(/morocco|botola/.test(league+' '+country)) add(['arryadia','bein sports','ssc']);
-    else if(/saudi|saudi arabia/.test(league+' '+country)) add(['ssc','bein sports']);
-    else if(/qatar/.test(league+' '+country)) add(['alkass','bein sports']);
-    else if(/egypt/.test(league+' '+country)) add(['ontime','bein sports']);
-    else if(/brazil/.test(league+' '+country)) add(['espn brasil','sportv','tnt brasil','globo']);
-    else if(/argentina/.test(league+' '+country)) add(['espn argentina','tyc sports','tnt sports argentina']);
-    else if(/mexico/.test(league+' '+country)) add(['tudn mx','espn','fox sports','claro sports']);
-    else if(/usa|united states|mls/.test(league+' '+country)) add(['espn usa','fox','cbs sports','tudn usa','bein sports usa']);
-    else if(/canada/.test(league+' '+country)) add(['tsn','sportsnet','rds']);
-    else if(/turkey|super lig/.test(league+' '+country)) add(['bein sports','trt spor','a spor']);
-    else if(/portugal|primeira liga/.test(league+' '+country)) add(['sport tv','eleven sports','dazn']);
-
-    const result=[];
-    for(const key of keys){
-        all.forEach(ch=>{
-            const n=String(ch.name||'').toLowerCase();
-            if((n.includes(key)||key.includes(n)) && !result.some(x=>x.id===ch.id)) result.push(ch);
-        });
-        if(result.length>=6) break;
-    }
-    return result.slice(0,6);
+function kNormalizeChannelName(v){
+    return String(v ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'')
+      .toLowerCase()
+      .replace(/\b(hd|fhd|uhd|sd|live|tv|channel|canal|ch)\b/g,' ')
+      .replace(/[^a-z0-9\u0600-\u06ff]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
 }
 
+function kBroadcastNamesFromValue(value, out, depth=0){
+    if(depth>5 || value==null) return;
+
+    if(typeof value === 'string'){
+        const v=value.trim();
+        if(v) out.push(v);
+        return;
+    }
+
+    if(Array.isArray(value)){
+        value.forEach(v=>kBroadcastNamesFromValue(v,out,depth+1));
+        return;
+    }
+
+    if(typeof value !== 'object') return;
+
+    [
+      'name','channel','channel_name','station','station_name',
+      'broadcaster','broadcaster_name','network','network_name',
+      'tv','title'
+    ].forEach(k=>{
+        if(value[k]!=null) kBroadcastNamesFromValue(value[k],out,depth+1);
+    });
+
+    [
+      'broadcast','broadcasts','tv','tvChannels','tv_channels',
+      'channels','stations','networks'
+    ].forEach(k=>{
+        if(value[k]!=null) kBroadcastNamesFromValue(value[k],out,depth+1);
+    });
+}
+
+function kExtractApiBroadcastNames(fixture){
+    const out=[];
+    /*
+      API-Football's normal /fixtures response is primarily fixture/team/score data.
+      We only accept broadcaster fields when they are explicitly present in the
+      returned object. Legacy fields such as `channel` are deliberately ignored
+      because old cached/manual values caused repeated wrong channels.
+    */
+    const sources=[
+      fixture?.broadcast, fixture?.broadcasts,
+      fixture?.tvChannels, fixture?.tv_channels,
+      fixture?.fixture?.broadcast, fixture?.fixture?.broadcasts,
+      fixture?.fixture?.tvChannels, fixture?.fixture?.tv_channels
+    ];
+    sources.forEach(v=>kBroadcastNamesFromValue(v,out));
+    return [...new Set(out.map(v=>String(v).trim()).filter(Boolean))];
+}
+
+/* مقارنة صارمة:
+   1) تطابق normalized كامل.
+   2) aliases معروفة فقط.
+   لا نستخدم includes() حتى لا تتحول "ESPN" إلى كل قنوات ESPN. */
+const KIKON_CHANNEL_ALIASES = new Map([
+  ['beinsports hd 1','beIN Sports 1 Arabic'],
+  ['beinsports hd 2','beIN Sports 2 Arabic'],
+  ['beinsports hd 3','beIN Sports 3 Arabic'],
+  ['beinsports hd 4','beIN Sports 4 Arabic'],
+  ['beinsports hd 5','beIN Sports 5 Arabic'],
+  ['beinsports hd 6','beIN Sports 6 Arabic'],
+  ['beinsports hd 7','beIN Sports 7 Arabic'],
+  ['beinsports mena english 1','beIN Sports MENA English 1'],
+  ['beinsports mena english 2','beIN Sports MENA English 2'],
+
+  ['beinsports','beIN SPORTS'],
+  ['bein sports','beIN SPORTS'],
+  ['bein sports arabic','beIN Sports'],
+  ['bein sports mena','beIN Sports MENA'],
+  ['espn','ESPN'],
+  ['espn usa','ESPN USA'],
+  ['espn2','ESPN2'],
+  ['espn2 usa','ESPN2 USA'],
+  ['fox sports 1','Fox Sports 1 USA'],
+  ['fox sports 2','Fox Sports 2 USA'],
+  ['tnt sports','TNT Sports'],
+  ['sky sports football','Sky Sports Football UK'],
+  ['canal plus foot','Canal+ Foot France']
+]);
+
+function kChannelNamesMatch(apiName,catalogName){
+    const a=kNormalizeChannelName(apiName);
+    const b=kNormalizeChannelName(catalogName);
+    if(!a || !b) return false;
+
+    if(a===b) return true;
+
+    const alias=KIKON_CHANNEL_ALIASES.get(a);
+    if(alias && kNormalizeChannelName(alias)===b) return true;
+
+    return false;
+}
+
+function kUniqueChannels(list){
+    const seen=new Set(),out=[];
+    (list||[]).forEach(ch=>{
+        const key=String(ch?.id ?? '');
+        if(!key || seen.has(key)) return;
+        seen.add(key);
+        out.push(ch);
+    });
+    return out;
+}
+
+function kFindChannels(fixture){
+    const all=kChannelCatalog();
+    if(!all.length) return [];
+
+    /* المصدر المكتوب للمباراة له الأولوية: القنوات المذكورة في ملف الجدول. */
+    const sourceNames=Array.isArray(fixture?._sourceChannels)?fixture._sourceChannels:[];
+    const sourceMatched=[];
+    for(const rawName of sourceNames){
+        const name=String(rawName||'').trim();
+        if(!name || /^(subscribe)$/i.test(name)) continue;
+        const ch=all.find(x=>kChannelNamesMatch(name,x.name));
+        if(ch && !sourceMatched.some(x=>Number(x.id)===Number(ch.id))){
+            sourceMatched.push({...ch,_sourceBroadcast:name,_sourceRights:true});
+        }
+    }
+    if(sourceMatched.length) return sourceMatched.slice(0,8);
+
+    /* fallback محلي فقط: حقوق البطولة المكتوبة في channelsDatabase. */
+    const rule=kLeagueRule(fixture);
+    if(!rule) return [];
+    const rights=Array.isArray(rule.aliases) ? rule.aliases.map(kNormalizeChannelName) : [];
+    const key=kNormalizeChannelName(rule.key);
+    const matched=all.filter(ch=>{
+        const cr=Array.isArray(ch.rights) ? ch.rights.map(kNormalizeChannelName) : [];
+        return cr.includes(key) || rights.some(r=>cr.includes(r));
+    });
+    const ordered=[];
+    for(const wanted of rule.channels){
+        const target=kNormalizeChannelName(wanted);
+        const ch=matched.find(x=>kNormalizeChannelName(x.name)===target);
+        if(ch && !ordered.some(x=>Number(x.id)===Number(ch.id))) ordered.push({...ch,_rightsRule:rule.key});
+    }
+    return ordered.slice(0,8);
+}
 
 /* SMART MATCH FILTER + RANKING + BROADCAST MATCHING */
 
@@ -768,12 +1074,9 @@ const KIKON_MAJOR_LEAGUES={
 
 /* شمال أفريقيا والعالم العربي لهما أولوية واضحة، مع بقاء أوروبا الكبرى في الصدارة */
 const KIKON_REGION_PRIORITY={
- 'Morocco':115,'Algeria':110,'Tunisia':110,'Egypt':108,'Libya':100,
+ 'Morocco':115,'Algeria':110,'Egypt':108,
  'Saudi Arabia':102,'Qatar':90,'United Arab Emirates':88,'UAE':88,
- 'England':100,'Spain':100,'Italy':100,'Germany':100,'France':98,
- 'Portugal':88,'Netherlands':84,'Belgium':80,'Turkey':88,'Scotland':76,
- 'Brazil':80,'Argentina':80,'Mexico':72,'USA':55,'United States':55,
- 'Japan':58,'South Korea':55,'South Africa':72
+ 'England':100,'Spain':100,'Italy':100,'Germany':100,'France':98,'Scotland':76,
 };
 
 function kLeagueScore(f){
@@ -788,54 +1091,88 @@ function kLeagueScore(f){
 function kCountryScore(f){
  return KIKON_REGION_PRIORITY[String(f.league?.country||'')]||12;
 }
-function kIsMajorFixture(f){
- return kLeagueScore(f)>=65 || kCountryScore(f)>=70;
+/* =========================================================
+   KIKON V9 — STRICT MAJOR COMPETITIONS FILTER
+   نعرض فقط الدول الكبرى + الدول العربية + البطولات العالمية/القارية
+   ولا نعرض الدرجات الدنيا أو البطولات المحلية غير المعروفة.
+   ========================================================= */
+const KIKON_ALLOWED_COUNTRIES = new Set([
+  // الدول الأوروبية الكبرى فقط
+  'England','Spain','Italy','Germany','France',
+  // الدول العربية المطلوبة فقط
+  'Morocco','Algeria','Egypt','Saudi Arabia','Qatar',
+  'United Arab Emirates','UAE'
+]);
+
+const KIKON_MAJOR_LEAGUE_PATTERNS = [
+  /premier league/i,/la liga/i,/serie a/i,/bundesliga/i,/ligue 1/i,
+  /eredivisie/i,/primeira liga/i,/pro league/i,/super lig/i,/scottish premiership/i,
+  /championship/i,/fa cup/i,/copa del rey/i,/coppa italia/i,/dfb pokal/i,/coupe de france/i,
+  /saudi pro league/i,/qatar stars league/i,/uae pro league/i,/botola/i,
+  /egyptian premier league/i,/caf champions league/i,/caf confederation cup/i,
+  /major league soccer/i,/\bmls\b/i,/brasileirao serie a/i,/liga profesional argentina/i,
+  /liga mx/i,/copa libertadores/i,/copa sudamericana/i,/j1 league/i,/k league 1/i,
+  /world cup/i,/european championship/i,/africa cup of nations/i,/afcon/i,/copa america/i,
+  /asian cup/i,/concacaf gold cup/i,/uefa champions league/i,/uefa europa league/i,
+  /uefa europa conference league/i,/nations league/i,/club world cup/i,
+  /arab cup/i,/african nations/i
+];
+
+function kIsAllowedMajorFixture(f){
+  const country=String(f.league?.country||'').trim();
+  const league=String(f.league?.name||'').trim();
+  const continental = /world cup|european championship|africa cup|afcon|copa america|asian cup|gold cup|champions league|europa league|conference league|nations league|club world cup|arab cup|copa libertadores|copa sudamericana/i.test(league);
+  if(continental) return true;
+  if(!KIKON_ALLOWED_COUNTRIES.has(country)) return false;
+  return KIKON_MAJOR_LEAGUE_PATTERNS.some(rx=>rx.test(league));
 }
 
-/* ترتيب القنوات بحسب البطولة والدولة، مع fallback داخل نفس العائلة */
-function kFindChannels(f){
- const all=kChannelCatalog();
- const league=String(f.league?.name||'').toLowerCase();
- const country=String(f.league?.country||'').toLowerCase();
- const home=String(f.teams?.home?.name||'').toLowerCase();
- const away=String(f.teams?.away?.name||'').toLowerCase();
-
- const rules=[
-  [/morocco|botola|coupe du trone/,'arryadia|bein sports|ssc'],
-  [/algeria|algerian|ligue 1|coupe d'algerie/,'entv|canal algerie|bein sports'],
-  [/tunisia|tunisian|ligue 1|coupe de tunisie/,'wataniya|bein sports|elhiwar'],
-  [/egypt|egyptian|premier league/,'ontime|bein sports|ssc'],
-  [/libya|libyan/,'libya sport|bein sports'],
-  [/saudi|saudi arabia/,'ssc|bein sports'],
-  [/qatar/,'alkass|bein sports'],
-  [/uae|united arab emirates|emirates/,'abu dhabi sports|dubai sports|bein sports'],
-  [/england|premier|championship|fa cup/,'sky sports|tnt sports|bein sports|premier sports'],
-  [/spain|laliga|copa del rey/,'movistar|laliga|bein sports|dazn|espn'],
-  [/italy|serie a|coppa italia/,'dazn|sky sport|bein sports'],
-  [/germany|bundesliga|dfb/,'sky sport|dazn|sportdigital'],
-  [/france|ligue 1|coupe de france/,'canal\\+|bein sports|dazn'],
-  [/portugal|primeira liga/,'sport tv|eleven sports|dazn'],
-  [/turkey|super lig/,'bein sports|trt spor|a spor'],
-  [/netherlands|eredivisie/,'espn|ziggo|sport1'],
-  [/brazil/,'sportv|espn|tnt brasil|globo'],
-  [/argentina/,'tyc sports|espn|tnt sports']
- ];
-
- const scored=all.map(ch=>{
-   const n=String(ch.name||'').toLowerCase();
-   let s=0;
-   /* مطابقة اسم البطولة */
-   league.split(/[\s\-:]+/).filter(w=>w.length>3).forEach(w=>{if(n.includes(w))s+=12});
-   /* الدولة/البطولة */
-   rules.forEach(([rx,cr])=>{
-     if(rx.test(country+' '+league) && new RegExp(cr,'i').test(n))s+=35;
-   });
-   /* احتياط عام للقنوات الرياضية المعروفة */
-   if(/bein sports|espn|dazn|sky sports|tnt sports|ssc|canal\+|sport tv/.test(n))s+=2;
-   return {ch,s};
- }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
- return scored.slice(0,6).map(x=>x.ch);
+/* إصلاح تناقض النتيجة والحالة:
+   NS/TBD/PST/CANC/SUSP لا يمكن أن تعرض نتيجة قديمة أو خاطئة. */
+function kStripLegacyBroadcastFields(f){
+  if(!f || typeof f!=='object') return f;
+  /*
+    Remove legacy/manual broadcaster properties that are not authoritative.
+    Explicit broadcast/broadcasts/tvChannels/tv_channels are preserved.
+  */
+  const clone=JSON.parse(JSON.stringify(f));
+  ['channel','channel_name','station','station_name','network','network_name','tv'].forEach(k=>{
+    delete clone[k];
+    if(clone.fixture) delete clone.fixture[k];
+  });
+  return clone;
 }
+
+function kSanitizeFixture(f){
+  if(!f || typeof f!=='object') return null;
+  const st=String(f.fixture?.status?.short||'').toUpperCase();
+  if(!f.fixture) f.fixture={};
+  if(!f.goals) f.goals={home:null,away:null};
+  if(['NS','TBD','PST','CANC','SUSP'].includes(st)){
+    f.goals.home=null;
+    f.goals.away=null;
+  }
+  return f;
+}
+
+function kNormalizeFixtures(list){
+  const seen=new Set();
+  const out=[];
+  for(const raw of (Array.isArray(list)?list:[])){
+    const f=kSanitizeFixture(kStripLegacyBroadcastFields(raw));
+    if(!f || !f.teams?.home?.name || !f.teams?.away?.name || !f.fixture?.date) continue;
+    const home=String(f.teams?.home?.name||'').trim().toLowerCase();
+    const away=String(f.teams?.away?.name||'').trim().toLowerCase();
+    const date=String(f.fixture?.date||'').slice(0,16);
+    const key=String(f.fixture?.id||'')+'|'+home+'|'+away+'|'+date;
+    if(seen.has(key)) continue;
+    seen.add(key);
+    out.push(f);
+  }
+  return out;
+}
+
+
 
 /* ترتيب حازم:
    1) المباريات التي تلعب الآن كلها في الأعلى
@@ -844,7 +1181,7 @@ function kFindChannels(f){
    4) أولوية أوروبا الكبرى والعالم العربي وشمال أفريقيا
 */
 function kFixtureLive(f){
- const s=String(f.fixture?.status?.short||'');
+ const s=kEffectiveStatus(f);
  return ['1H','HT','2H','ET','BT','P','LIVE'].includes(s);
 }
 function kFixtureUpcoming(f){
@@ -859,32 +1196,176 @@ function kFixtureRank(f){
    time:new Date(f.fixture?.date||0).getTime()||0
  };
 }
+
+/* GLOBAL CHANNEL-REGION RIGHTS DATABASE — supplied by user. */
+
+
+/* =========================================================
+   KIKON V27 — DETERMINISTIC CHANNEL-ARRAY LINKER
+   القاعدة الوحيدة:
+   - Channels Array = channelsData
+   - لا يتم إنشاء قناة جديدة.
+   - لا يتم البحث بالكلمات داخل اسم المزود.
+   - لا يتم اختيار قناة عشوائياً.
+   - كل بطولة لها ترتيب قنوات محدد مسبقاً.
+   - resolver يبحث عن هذه الأسماء داخل channelsData فقط.
+   - إذا لم توجد القناة في Channels Array فلا تظهر ولا يمكن الضغط عليها.
+   - League/Tournament هو مفتاح الربط الأول والأخير؛ API لا يستطيع إضافة قناة خارج حقوق البطولة.
+   ========================================================= */
+
+const KIKON_EXTRA_RIGHTS_RULES = [
+  { key:'sporttv_portugal', aliases:['sport tv portugal','sport tv','liga portugal','primeira liga','liga portugal 2','liga portugal 2 betclic','taça de portugal','taca de portugal','taça da liga','taca da liga','supertaça','supertaca','serie a','premier league','la liga','bundesliga','ligue 1','eredivisie','scottish premiership','süper lig','super lig','saudi pro league','fa cup','carabao cup','efl championship','uefa champions league','champions league','europa league','conference league','fifa club world cup','uefa super cup','copa libertadores','copa sudamericana','fifa world cup','world cup qualifiers','uefa nations league'], channels:['Sport TV1 Portugal','Sport TV2 Portugal','Sport TV3 Portugal','Sport TV4 Portugal','Sport TV5 Portugal','Sport TV6 Portugal'] },
+  { key:'arena_sports_balkans', aliases:['serbian superliga','serbian super liga','serbia super liga','süper lig','super lig','eredivisie','dutch eredivisie','danish superliga','bulgarian first professional football league','bulgarian first league','hungarian nb i','ekstraklasa','polish ekstraklasa','romanian liga i','liga i','ukrainian premier league','europa conference league','conference league','serbian cup'], channels:['Arena Sport 1 Serbia','Arena Sport 2 Serbia','Arena Sport 3 Serbia','Arena Sport 4 Serbia','Arena Sport 5 Serbia','Arena Sport 6 Serbia','Arena Sport 7 Serbia','Arena Sport 1 Croatia','Arena Sport 2 Croatia','Arena Sport 3 Croatia','Arena Sport 4 Croatia','Arena Sport 1 BiH'] },
+  { key:'ziggo_sport_netherlands', aliases:['eredivisie','dutch eredivisie','uefa champions league','champions league','europa league','conference league'], channels:['Ziggo Sport NL','Ziggo Sport 2 NL','Ziggo Sport 3 NL'] },
+  { key:'dazn_global_rights', aliases:['la liga','laliga','serie a','ligue 1','bundesliga','eredivisie','belgian pro league','jupiler pro league','saudi pro league','super lig','turkish super lig','fifa club world cup','fifa world cup','uefa champions league','champions league'], channels:['DAZN LaLiga','DAZN 1 Spain','DAZN ZONA Italy','DAZN Germany','DAZN Ligue 1 France'] },
+  { key:'bein_mena_rights', aliases:['premier league','english premier league','la liga','laliga','serie a','bundesliga','ligue 1','uefa champions league','champions league','europa league','conference league','süper lig','super lig','liga portugal','primeira liga','saudi pro league','egyptian premier league','botola pro','africa cup of nations','caf champions league','copa libertadores','copa sudamericana','fifa world cup'], channels:['beIN Sports 1 Arabic','beIN Sports 2 Arabic','beIN Sports 3 Arabic','beIN Sports 4 Arabic','beIN Sports 5 Arabic','beIN Sports 6 Arabic','beIN Sports 7 Arabic','beIN Sports 8 Arabic','beIN Sports 9 Arabic','beIN Sports MENA English 1','beIN Sports MENA English 2','BeIN Sports HD Qatar','beIN SPORTS MAX AR'] },
+];
+
+const KIKON_LEAGUE_CHANNEL_RULES = [
+  { key:'champions', aliases:['uefa champions league','champions league','champions league qualification','دوري أبطال أوروبا'], channels:['beIN Sports 1 Arabic','beIN Sports 2 Arabic','beIN Sports 3 Arabic','beIN Sports 4 Arabic'] },
+  { key:'europa', aliases:['uefa europa league','europa league','الدوري الأوروبي'], channels:['beIN Sports 1 Arabic','beIN Sports 2 Arabic','beIN Sports 3 Arabic'] },
+  { key:'conference', aliases:['uefa europa conference league','conference league','الدوري المؤتمر الأوروبي'], channels:['beIN Sports 1 Arabic','beIN Sports 2 Arabic','beIN Sports 3 Arabic'] },
+
+  { key:'premier', aliases:['premier league','english premier league','الدوري الإنجليزي الممتاز'], channels:['Canal+ Foot France','Canal+ Sport France','Canal+ France'] },
+  { key:'championship', aliases:['championship','efl championship','دوري البطولة الإنجليزي'], channels:['beIN Sports MAX 4 France','beIN Sports 1 France','beIN Sports 2 France'] },
+  { key:'fa', aliases:['fa cup','the fa cup','كأس الاتحاد الإنجليزي'], channels:['Canal+ Sport France','beIN Sports 1 France','beIN Sports 2 France'] },
+  { key:'carabao', aliases:['carabao cup','league cup','كأس الرابطة الإنجليزية'], channels:['Sky Sports Football UK','TNT Sports 1 UK','Canal+ Sport France'] },
+
+  { key:'laliga', aliases:['laliga','la liga','الدوري الإسباني'], channels:['DAZN LaLiga','Movistar Laliga','DAZN 1 Spain'] },
+  { key:'copa_del_rey', aliases:['copa del rey','كأس ملك إسبانيا'], channels:['DAZN LaLiga','Movistar Laliga','L\'Equipe France'] },
+  { key:'supercopa', aliases:['supercopa de españa','spanish super cup','السوبر الإسباني'], channels:['DAZN LaLiga','Movistar Laliga'] },
+
+  { key:'ligue1', aliases:['ligue 1','ligue 1 mcDonald\'s','الدوري الفرنسي'], channels:['DAZN Ligue 1 France','beIN SPORTS 1 France','beIN SPORTS 2 France'] },
+  { key:'ligue2', aliases:['ligue 2','الدوري الفرنسي الدرجة الثانية'], channels:['beIN SPORTS 1 France','beIN SPORTS 2 France','beIN SPORTS 3 France'] },
+  { key:'coupe_france', aliases:['coupe de france','كأس فرنسا'], channels:['beIN SPORTS 1 France','beIN SPORTS 2 France','France 2'] },
+
+  { key:'seriea', aliases:['serie a','italian serie a','الدوري الإيطالي'], channels:['DAZN ZONA Italy','Sky Calcio 1 (251) Italy','Sky Calcio 2 (252) Italy'] },
+  { key:'coppa', aliases:['coppa italia','كأس إيطاليا'], channels:['Rai Sport Italy','20 Mediaset Italy','Sky Sport UNO Italy'] },
+  { key:'italy_super', aliases:['supercoppa italiana','italian super cup','السوبر الإيطالي'], channels:['Rai Sport Italy','20 Mediaset Italy'] },
+
+  { key:'bundesliga', aliases:['bundesliga','bundesliga 1','الدوري الألماني'], channels:['Sky Sport Bundesliga 1 HD','DAZN Germany','DAZN Germany'] },
+  { key:'dfb', aliases:['dfb pokal','dfb-pokal','كأس ألمانيا'], channels:['Sky Sport Bundesliga 1 HD','ZDF DE','ZDF / ARD / Sat.1'] },
+
+  { key:'eredivisie', aliases:['eredivisie','dutch eredivisie','الدوري الهولندي'], channels:['Ziggo Sport NL','Ziggo Sport 2 NL','Ziggo Sport 3 NL'] },
+  { key:'belgium', aliases:['belgian pro league','jupiler pro league','الدوري البلجيكي'], channels:['DAZN Belgium','Play Sports 1 Belgium'] },
+  { key:'portugal', aliases:['liga portugal','primeira liga','الدوري البرتغالي'], channels:['Sport TV1 Portugal','Sport TV2 Portugal','Sport TV3 Portugal'] },
+  { key:'turkey', aliases:['super lig','süper lig','turkish super lig','الدوري التركي'], channels:['beIN SPORTS 1 Turkey','beIN SPORTS 2 Turkey','beIN SPORTS 3 Turkey'] },
+
+  { key:'saudi', aliases:['saudi pro league','roschn saudi league','دوري روشن السعودي','الدوري السعودي'], channels:['SSC Sport 1','SSC Sport 2','SSC Sport 3'] },
+  { key:'qatar', aliases:['qatar stars league','دوري نجوم قطر'], channels:['Alkass One','Alkass Two','BeIN Sports HD Qatar'] },
+  { key:'egypt', aliases:['egyptian premier league','الدوري المصري الممتاز'], channels:['OnTime Sports','beIN Sports 1 Arabic'] },
+  { key:'morocco', aliases:['botola pro','botola','البطولة الاحترافية المغربية'], channels:['الرياضية المغربية (Arryadia)','beIN Sports 1 Arabic'] },
+
+  { key:'mls', aliases:['major league soccer','mls','الدوري الأمريكي'], channels:['Apple TV (FR)','ESPN USA','FOX Soccer Plus'] },
+  { key:'copa_libertadores', aliases:['copa libertadores','كأس ليبرتادوريس'], channels:['ESPN Deportes','ESPN USA'] },
+  { key:'copa_sudamericana', aliases:['copa sudamericana','كوبا سودأمريكانا'], channels:['ESPN Deportes','ESPN USA'] },
+  { key:'liga_mx', aliases:['liga mx','mexican league','الدوري المكسيكي'], channels:['FOX Deportes USA','ESPN Deportes'] }
+];
+
+function kAllLeagueChannelRules(){
+  return [...KIKON_LEAGUE_CHANNEL_RULES, ...KIKON_EXTRA_RIGHTS_RULES];
+}
+
+function kLeagueRule(f){
+  const hay=(String(f?.league?.name||'')+' '+String(f?.league?.country||'')).toLowerCase().trim();
+  return kAllLeagueChannelRules().find(rule=>rule.aliases.some(a=>hay.includes(String(a).toLowerCase()))) || null;
+}
+
+function kFindCatalogChannelExact(name){
+  const target=kNormalizeChannelName(name);
+  if(!target) return null;
+  return kChannelCatalog().find(ch=>kNormalizeChannelName(ch.name)===target) || null;
+}
+
+/*
+  إسناد حقوق البطولة لكل عنصر داخل Channels Array.
+  channelsData تبقى المصدر الحقيقي للقنوات؛ rights مجرد metadata للربط.
+*/
+function kApplyChannelRights(){
+    const catalog=kChannelCatalog();
+    kAllLeagueChannelRules().forEach(rule=>{
+        (rule.channels||[]).forEach(channelName=>{
+            const target=kNormalizeChannelName(channelName);
+            catalog.filter(ch=>kNormalizeChannelName(ch.name)===target).forEach(ch=>{
+                if(!Array.isArray(ch.rights)) ch.rights=[];
+                if(!ch.rights.includes(rule.key)) ch.rights.push(rule.key);
+                (rule.aliases||[]).forEach(alias=>{
+                    if(!ch.rights.includes(alias)) ch.rights.push(alias);
+                });
+            });
+        });
+    });
+}
+
+/* تنفيذ مرة واحدة بعد تعريف قواعد البطولات. */
+kApplyChannelRights();
+
+function kLeagueArrayFallbackChannels(f){
+    return kFindChannels(f);
+}
+
+function kUEFATournamentKey(f){
+  const n=String(f?.league?.name||'').toLowerCase();
+  if(n.includes('champions')) return 'champions';
+  if(n.includes('europa') && !n.includes('conference')) return 'europa';
+  if(n.includes('conference')) return 'conference';
+  return null;
+}
+
+function kUEFAFallbackNames(f){
+  const key=kUEFATournamentKey(f);
+  if(!key) return [];
+  return KIKON_UEFA_FALLBACK_RIGHTS[key] || [];
+}
+
+function kSourceChannelReport(f){
+    const catalog=kChannelCatalog();
+    const id=Number(f.fixture?.id||0);
+    const sourceNames=Array.isArray(f?._sourceChannels)?f._sourceChannels.filter(x=>x&&x!=='Subscribe'):[];
+    const rows=[];
+    const seen=new Set();
+    sourceNames.forEach(raw=>{
+        const name=String(raw).trim();
+        const ch=catalog.find(x=>kChannelNamesMatch(name,x.name));
+        if(ch){
+            const cid=Number(ch.id);
+            if(!seen.has(cid)){seen.add(cid);rows.push(`<button class="match-channel match-channel-rights" type="button" onclick="playKMatchChannel(${id},${cid},event)">${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(name)} ✓ تشغيل</span></button>`)}
+        }else{
+            rows.push(`<div class="match-channel match-channel-unavailable"><span>📺 ${kEsc(name)} · ناقل من الملف · غير موجود في قائمة التشغيل</span></div>`);
+        }
+    });
+    /* إذا لم يذكر جدول المباراة قناة، استخدم فقط حقوق البطولة المكتوبة محلياً. */
+    if(!rows.length){
+        const channels=kFindChannels(f);
+        channels.forEach(ch=>{
+            const cid=Number(ch.id); if(!Number.isFinite(cid)||seen.has(cid)) return;
+            seen.add(cid); rows.push(`<button class="match-channel" type="button" onclick="playKMatchChannel(${id},${cid},event)">${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)} · حقوق البطولة</span></button>`);
+        });
+    }
+    return rows.length ? `<div class="match-note">📺 الناقلون والقنوات كما وردت في ملفات المشروع:</div><div class="match-channel-list">${rows.join('')}</div>` : '<div class="match-note">📺 لا توجد قناة مكتوبة لهذه المباراة في الملفات.</div>';
+}
 function kMatchCard(f) {
-    const st=f.fixture?.status?.short||'';
+    const st=kEffectiveStatus(f);
     const live=kStatusRank(st)===0;
     const h=f.teams?.home||{}, a=f.teams?.away||{};
     const hs=f.goals?.home, as=f.goals?.away;
-    const score=(hs==null||as==null)?'—':`${hs} - ${as}`;
-    const channels=kFindChannels(f);
+    const score=(['NS','TBD','PST','CANC','SUSP'].includes(String(st).toUpperCase()) || hs==null || as==null)
+      ? '—' : `${hs} - ${as}`;
     const id=Number(f.fixture?.id||0);
-    return `<article class="match-tile ${live?'live':''}" id="km-${id}" onclick="toggleKMatch(${id})">
+    const source=String(f._source||'').includes('TV-France') || f._source==='UEFA-file';
+    return `<article class="match-tile ${live?'live':''} open" id="km-${id}" onclick="toggleKMatch(${id})">
         <div class="match-time">${live?'🔴 ':''}${kTime(f.fixture?.date)}<div class="match-state">${kEsc(kStatus(st))}${f.fixture?.status?.elapsed!=null?' '+f.fixture.status.elapsed+"'":''}</div></div>
         <div class="match-teams">
             <div class="match-team">${h.logo?`<img src="${kEsc(h.logo)}" alt="">`:''}${kEsc(h.name||'المضيف')}</div>
             <div class="match-score">${kEsc(score)}</div>
             <div class="match-team">${a.logo?`<img src="${kEsc(a.logo)}" alt="">`:''}${kEsc(a.name||'الضيف')}</div>
         </div>
-        <div class="match-meta">${kFlag(f.league?.country)} ${kEsc(f.league?.country||'')} · ${kEsc(f.league?.name||'')}</div>
+        <div class="match-meta">${f._source==='UEFA-file'?'<strong style="color:#22c55e">UEFA</strong> · ':''}${kFlag(f.league?.country)} ${kEsc(f.league?.country||'')} · ${kEsc(f.league?.name||'')}</div>
         <div class="match-channels" onclick="event.stopPropagation()">
-            <div class="match-note">📺 قنوات موجودة في ملفك ومطابقة للدولة/البطولة:</div>
-            ${channels.length?`<div class="match-channel-list">${channels.map(ch=>`
-                <button class="match-channel" type="button" onclick="playKMatchChannel(${id},${Number(ch.id)},event)">
-                    ${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)}</span>
-                </button>`).join('')}</div>`:'<div class="match-note">لم يتم العثور على مطابقة تلقائية. استخدم بحث القنوات أدناه.</div>'}
+            ${kSourceChannelReport(f)}
         </div>
     </article>`;
 }
-
 function toggleKMatch(id) {
     const el=document.getElementById('km-'+id);
     if(el) el.classList.toggle('open');
@@ -912,8 +1393,7 @@ function playKMatchChannel(matchId, channelId, ev) {
         playChannel(ch.id, null);
 
         card.classList.add('open');
-        card.classList.add('cinema');
-
+        
         /* إبقاء وضع السينما للمشغل الرئيسي، وليس إنشاء مشغل داخل البطاقة. */
         document.getElementById('playerContainer')?.classList.add('cinema-mode');
 
@@ -945,74 +1425,48 @@ function closeKMatchCinema(id,ev) {
     /* لا نوقف القناة ولا نزيل cinema-mode */
 }
 
-async function kFootballFetch(date) {
-    const r=await fetch(KIKON_FOOTBALL_BASE+'/fixtures?date='+encodeURIComponent(date),{
-        method:'GET',cache:'no-store',
-        headers:{'x-apisports-key':KIKON_FOOTBALL_KEY,'Accept':'application/json'}
-    });
-    const text=await r.text();
-    let json;
-    try{json=JSON.parse(text)}catch(e){throw new Error('استجابة غير صالحة من API-Football');}
-    if(!r.ok) throw new Error('API-Football HTTP '+r.status);
-    if(json.errors && Object.keys(json.errors).length) throw new Error(Object.values(json.errors).join(' | '));
-    return Array.isArray(json.response)?json.response:[];
+/* =========================================================
+   KIKON LOCAL MATCH ENGINE — FILES ONLY
+   ========================================================= */
+function kSBNorm(v){
+  return String(v ?? '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]+/g,' ').trim()
+    .replace(/\s+/g,' ');
 }
-
-function renderKMatches(fixtures) {
-    kikonMatchesCache=fixtures||[];
-    const box=document.getElementById('matchesList');
-    if(!box)return;
-    const filteredFixtures=kikonMatchesCache.filter(kIsMajorFixture);
-    const liveFixtures=filteredFixtures.filter(kFixtureLive)
-      .sort((a,b)=>kLeagueScore(b)-kLeagueScore(a)||kCountryScore(b)-kCountryScore(a));
-    const upcomingFixtures=filteredFixtures.filter(f=>!kFixtureLive(f))
-      .sort((a,b)=>{
-        const ta=new Date(a.fixture?.date||0).getTime();
-        const tb=new Date(b.fixture?.date||0).getTime();
-        /* القادم: الوقت أولاً، ثم البطولة عند تساوي الوقت */
-        return ta-tb || kLeagueScore(b)-kLeagueScore(a) || kCountryScore(b)-kCountryScore(a);
-      });
-    const sorted=[...liveFixtures,...upcomingFixtures];
-    const countries=new Map();
-    sorted.forEach(f=>{
-        const c=f.league?.country||'أخرى', l=f.league?.name||'بطولة أخرى';
-        if(!countries.has(c))countries.set(c,new Map());
-        if(!countries.get(c).has(l))countries.get(c).set(l,[]);
-        countries.get(c).get(l).push(f);
-    });
-    let out='';
-    if(liveFixtures.length){
-        out+=`<div class="matches-country" style="font-size:1rem;border-bottom:2px solid #22c55e">🔴 المباريات المباشرة الآن <span style="font-size:.65rem;color:var(--text-sub)">(${liveFixtures.length})</span></div>`;
-    }
-    if(upcomingFixtures.length){
-        out+=`<div class="matches-country" style="font-size:.95rem">🕐 المباريات القادمة حسب التوقيت</div>`;
-    }
-    for(const [country, leagues] of countries){
-        out+=`<div class="matches-country">${kFlag(country)} ${kEsc(country)}</div>`;
-        for(const [league,list] of leagues){
-            out+=`<div class="matches-league">🏆 ${kEsc(league)} <span style="color:var(--text-sub)">(${list.length})</span></div><div class="matches-row">`;
-            out+=list.map(kMatchCard).join('');
-            out+='</div>';
-        }
-    }
-    box.innerHTML=out||'<div class="matches-placeholder">لا توجد مباريات لهذا اليوم.</div>';
+function kLocalFixtureId(prefix,r){const s=`${prefix}|${r.date}|${r.home}|${r.away}|${r.time}`;let h=7;for(let i=0;i<s.length;i++)h=((h*31+s.charCodeAt(i))>>>0);return -Math.max(1,h)}
+function kSourceFixtureDate(rec){const key=String(rec.date);const shift=Number(rec.day_shift_gmt1)||0;const d=new Date(`${key}T${rec.time_gmt1||rec.time}:00Z`);d.setUTCDate(d.getUTCDate()+shift);const yy=d.getUTCFullYear(),mm=String(d.getUTCMonth()+1).padStart(2,'0'),dd=String(d.getUTCDate()).padStart(2,'0'),hh=String(d.getUTCHours()).padStart(2,'0'),mi=String(d.getUTCMinutes()).padStart(2,'0');return `${yy}-${mm}-${dd}T${hh}:${mi}:00`}
+function kLocalCountryForLeague(league){const n=String(league||'').toLowerCase();if(/premier|championship|national league|fa cup|carabao/.test(n))return'England';if(/laliga|copa del rey/.test(n))return'Spain';if(/serie a|coppa italia/.test(n))return'Italy';if(/bundesliga|dfb|super cup/.test(n))return'Germany';if(/ligue 1|ligue 2|ligue 3|coupe de france/.test(n))return'France';if(/saudi/.test(n))return'Saudi Arabia';if(/super lig/.test(n))return'Turkey';if(/liga portugal|primeira/.test(n))return'Portugal';if(/eredivisie/.test(n))return'Netherlands';if(/belgian/.test(n))return'Belgium';if(/major league soccer|\bmls\b/.test(n))return'USA';return'World'}
+function kLocalSourceFixtures(){return(KIKON_SOURCE_SCHEDULE||[]).map(r=>({fixture:{id:kLocalFixtureId('tv',r),date:kSourceFixtureDate(r),status:{short:'NS',long:'Not Started'},elapsed:null},league:{id:0,name:r.league,country:kLocalCountryForLeague(r.league)},teams:{home:{id:0,name:r.home,logo:''},away:{id:0,name:r.away,logo:''}},goals:{home:null,away:null},_source:'TV-file',_sourceTimeFrance:r.time_fr,_sourceChannels:Array.isArray(r.channels)?r.channels:[]}))}
+function kLocalUEFAFixtures(){return(KIKON_UEFA_SCHEDULE||[]).map(r=>({fixture:{id:kLocalFixtureId('uefa',r),date:`${r.date}T${r.time_gmt1||r.time}:00`,status:{short:'NS',long:'Not Started'},elapsed:null},league:{id:0,name:r.league,country:'Europe'},teams:{home:{id:0,name:r.home,logo:''},away:{id:0,name:r.away,logo:''}},goals:{home:null,away:null},_source:'UEFA-file',_sourceTimeFrance:r.time,_sourceChannels:Array.isArray(r.channels)?r.channels:[],_sourceTimezone:'Africa/Casablanca GMT+1'}))}
+function kLocalAllFixtures(){
+ const raw=[...kLocalSourceFixtures(),...kLocalUEFAFixtures()];
+ const byKey=new Map();
+ raw.forEach(f=>{
+   const home=kSBNorm(f.teams?.home?.name),away=kSBNorm(f.teams?.away?.name),date=String(f.fixture?.date||'').slice(0,10);
+   const key=`${home}|${away}|${date}`;
+   const prev=byKey.get(key);
+   if(!prev){byKey.set(key,f);return;}
+   /* عند تكرار المباراة في ملفين: نحتفظ بمباراة واحدة ونضم القنوات.
+      ملف UEFA يحمل توقيتاً مصرحاً بأنه Africa/Casablanca GMT+1، لذلك له أولوية للوقت. */
+   const channels=[...(prev._sourceChannels||[]),...(f._sourceChannels||[])].filter(Boolean);
+   prev._sourceChannels=[...new Set(channels)];
+   if(f._source==='UEFA-file'){
+      prev.fixture.date=f.fixture.date;
+      prev._source='UEFA-file+TV-file';
+      prev._sourceTimezone='Africa/Casablanca GMT+1';
+   }
+ });
+ return kNormalizeFixtures([...byKey.values()]);
 }
-
-async function loadKikonMatches() {
-    const status=document.getElementById('matchesStatus');
-    const date=kikonDate();
-    if(status)status.textContent='جاري جلب مباريات '+date+'...';
-    try{
-        const fixtures=await kFootballFetch(date);
-        renderKMatches(fixtures);
-        if(status)status.textContent=`${document.querySelectorAll('.match-tile').length} مباراة مهمة من أصل ${fixtures.length} · آخر تحديث ${new Date().toLocaleTimeString('ar-MA',{hour:'2-digit',minute:'2-digit'})}`;
-    }catch(e){
-        console.error(e);
-        if(status)status.textContent='تعذر جلب المباريات';
-        const box=document.getElementById('matchesList');
-        if(box)box.innerHTML=`<div class="matches-error">⚠️ ${kEsc(e.message)}<br><small>تحقق من اتصال الإنترنت وصلاحية API-Football.</small></div>`;
-    }
-}
+function kLocalWeekBounds(base){const d=new Date(`${base}T12:00:00Z`),day=d.getUTCDay(),m=new Date(d);m.setUTCDate(d.getUTCDate()-(day===0?6:day-1));const s=new Date(m);s.setUTCDate(m.getUTCDate()+6);return{start:m.toISOString().slice(0,10),end:s.toISOString().slice(0,10)}}
+function kLocalDayName(date){return new Intl.DateTimeFormat('ar-MA',{weekday:'long',day:'2-digit',month:'2-digit',timeZone:KIKON_DISPLAY_TZ}).format(new Date(`${date}T12:00:00Z`))}
+function kLocalDateKey(f){return String(f?.fixture?.date||'').slice(0,10)}
+function kLocalFixturesForMode(mode){const all=kLocalAllFixtures(),base=kikonDate();if(mode==='uefa')return all.filter(f=>f._source==='UEFA-file');if(mode==='today')return all.filter(f=>kLocalDateKey(f)===base);if(mode==='tomorrow'){const d=new Date(`${base}T12:00:00Z`);d.setUTCDate(d.getUTCDate()+1);const key=d.toISOString().slice(0,10);return all.filter(f=>kLocalDateKey(f)===key)}const b=kLocalWeekBounds(base);return all.filter(f=>{const k=kLocalDateKey(f);return k>=b.start&&k<=b.end})}
+function kSetMatchesStatus(message){const status=document.getElementById('matchesStatus');if(status)status.textContent=message}
+function loadKikonMatches(){const list=kLocalAllFixtures();kikonMatchesCache=list;kEnsureMatchUI();kRenderMatchesV3();kSetMatchesStatus(`${list.length} مباراة من الملفات المحلية · بدون API · التوقيت Africa/Casablanca`);return list}
+function kBootLocalMatches(){kikonMatchesCache=kLocalAllFixtures();kEnsureMatchUI();kRenderMatchesV3();kSetMatchesStatus(`${kikonMatchesCache.length} مباراة من جدول الملفات المحلية`)}
+function kStartSmartPolling(){if(kPollingTimer)clearTimeout(kPollingTimer);kPollingTimer=setTimeout(()=>{kRenderMatchesV3();kStartSmartPolling()},60000)}
 
 function renderMatchChannels() {
     const box=document.getElementById('matchChannelsList');
@@ -1044,7 +1498,7 @@ function renderMatchChannels() {
     let out='';
     for(const [country,list] of groups){
         out+=`<div class="broadcast-country">${country}</div><div class="broadcast-grid">`;
-        out+=list.map(ch=>`<button type="button" class="broadcast-card" onclick="playChannel(${Number(ch.id)},null)">
+        out+=list.map(ch=>`<button type="button" class="broadcast-card" onclick="event.stopPropagation();playChannel(${Number(ch.id)},null);this.closest('.match-tile')?.classList.add('open')">
             ${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)}</span></button>`).join('');
         out+='</div>';
     }
@@ -1064,99 +1518,299 @@ function clearMatchChannels(){
 }
 
 </script>
-<style>#kMatchControls{margin:12px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}.k-match-search{flex:1;min-width:260px}.k-match-search input{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:var(--card,#111827);color:inherit}.k-qtabs{display:flex;gap:7px;flex-wrap:wrap}.k-qtab{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:inherit;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:700}.k-qtab.active{background:#16a34a;color:#fff;border-color:#16a34a}.k-empty{padding:25px;text-align:center;opacity:.75}</style><script>
-/* ===== KIKON V3 enhancements ===== */
+<style>#kMatchControls{margin:12px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}.k-match-search{flex:1;min-width:260px}.k-match-search input{width:100%;box-sizing:border-box;padding:11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:var(--card,#111827);color:inherit}.k-qtabs{display:flex;gap:7px;flex-wrap:wrap}.k-qtab{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:inherit;border-radius:10px;padding:9px 13px;cursor:pointer;font-weight:700}.k-qtab.active{background:#16a34a;color:#fff;border-color:#16a34a}.k-empty{padding:25px;text-align:center;opacity:.75}
+.match-tile.open .match-channels{display:block}
+.match-tile .match-channel{cursor:pointer}
+.match-tile .match-channel.selected{outline:2px solid #16a34a;outline-offset:1px}
+
+.matches-day-header{margin:12px 0 6px;padding:9px 11px;border:1px solid #334155;border-radius:10px;background:#111827;color:var(--accent);font-weight:900;display:flex;justify-content:space-between;gap:8px}.matches-day-header span{color:var(--text-sub);font-size:.7rem}.matches-day-header.live-header{border-color:#22c55e;color:#22c55e}
+</style><script>
+/* ===== KIKON LOCAL — FILES ONLY =====
+   لا توجد طلبات خارجية للمباريات.
+   كل جدول المباريات والقنوات مأخوذ من الملفات المدمجة داخل هذا المشروع.
+*/
 let kMatchFilter='all', kMatchSearch='';
-const KIKON_CACHE_KEY='kikon_matches_cache_v3', KIKON_CACHE_TTL=180000;
+
+const KIKON_CACHE_KEY='kikon_matches_cache_v16_gmt1_tvmerge';
+const KIKON_CACHE_TTL=20*60*1000;       // 20 دقيقة = حد أقصى نظري 72 طلباً/اليوم
+const KIKON_FALLBACK_CACHE_TTL=6*60*60*1000; // المصدر البديل: طلب واحد كحد أقصى كل 6 ساعات لكل يوم
+const KIKON_STALE_TTL=24*60*60*1000;    // 24 ساعة
 let kPollingTimer=null;
 
 function kLocalMatchTime(iso){
-  try{return new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(iso))}
-  catch(e){return '--:--'}
+  try{
+    return new Intl.DateTimeFormat(undefined,{
+      hour:'2-digit',minute:'2-digit',hour12:false
+    }).format(new Date(iso));
+  }catch(e){return '--:--'}
 }
+
 function kLocalMatchDate(iso){
-  try{return new Intl.DateTimeFormat(undefined,{weekday:'short',day:'2-digit',month:'2-digit'}).format(new Date(iso))}
-  catch(e){return ''}
+  try{
+    return new Intl.DateTimeFormat(undefined,{
+      weekday:'short',day:'2-digit',month:'2-digit'
+    }).format(new Date(iso));
+  }catch(e){return ''}
 }
+
 function kMatchStatus(f){
- const s=String(f.fixture?.status?.short||'');
- if(kFixtureLive(f)) return 'live';
- if(['FT','AET','PEN'].includes(s)) return 'finished';
- return 'upcoming';
+  const s=kEffectiveStatus(f);
+  if(['1H','HT','2H','ET','BT','P','LIVE'].includes(s)) return 'live';
+  if(['FT','AET','PEN','CANC','PST','SUSP'].includes(s)) return 'finished';
+  return 'upcoming';
 }
+
 function kMatchSearchText(f){
- return [f.teams?.home?.name,f.teams?.away?.name,f.league?.name,f.league?.country,
-   ...(kFindChannels(f)||[]).map(c=>c.name)].filter(Boolean).join(' ').toLocaleLowerCase();
+  return [
+    f.teams?.home?.name,
+    f.teams?.away?.name,
+    f.league?.name,
+    f.league?.country,
+    ...(kFindChannels(f)||[]).map(c=>c.name)
+  ].filter(Boolean).join(' ').toLocaleLowerCase();
 }
+
 function kSearchScore(f,q){
- const a=[f.teams?.home?.name,f.teams?.away?.name,f.league?.name,f.league?.country,
-   ...(kFindChannels(f)||[]).map(c=>c.name)].filter(Boolean).map(x=>String(x).toLocaleLowerCase());
- let s=0;
- for(const x of a){if(x===q)s=Math.max(s,100);else if(x.startsWith(q))s=Math.max(s,80);
-   else if(x.split(/\s+/).some(w=>w.startsWith(q)))s=Math.max(s,65);else if(x.includes(q))s=Math.max(s,40)}
- return s;
+  const a=[
+    f.teams?.home?.name,
+    f.teams?.away?.name,
+    f.league?.name,
+    f.league?.country,
+    ...(kFindChannels(f)||[]).map(c=>c.name)
+  ].filter(Boolean).map(x=>String(x).toLocaleLowerCase());
+
+  let score=0;
+  for(const x of a){
+    if(x===q) score=Math.max(score,100);
+    else if(x.startsWith(q)) score=Math.max(score,80);
+    else if(x.split(/\s+/).some(w=>w.startsWith(q))) score=Math.max(score,65);
+    else if(x.includes(q)) score=Math.max(score,40);
+  }
+  return score;
 }
+
 function kMatchesFiltered(list){
- const q=kMatchSearch.trim().toLocaleLowerCase();
- return list.filter(f=>{
-   const st=kMatchStatus(f);
-   const ok=kMatchFilter==='all'||(kMatchFilter==='live'&&st==='live')||
-     (kMatchFilter==='upcoming'&&st==='upcoming')||(kMatchFilter==='finished'&&st==='finished');
-   return ok&&(!q||kMatchSearchText(f).includes(q));
- });
+  const q=kMatchSearch.trim().toLocaleLowerCase();
+
+  return (list||[])
+    .filter(f=>{
+      const st=kMatchStatus(f);
+
+      const ok=kMatchFilter==='all' ||
+        (kMatchFilter==='live'&&st==='live') ||
+        (kMatchFilter==='upcoming'&&st==='upcoming') ||
+        (kMatchFilter==='finished'&&st==='finished');
+
+      return ok && (!q || kMatchSearchText(f).includes(q));
+    });
 }
+
 function kRenderQuickTabs(){
- const h=document.getElementById('kMatchesTabs'); if(!h)return;
- h.innerHTML=[['all','الكل'],['live','🔴 مباشر الآن'],['upcoming','لم تبدأ'],['finished','النتائج النهائية']]
- .map(x=>`<button class="k-qtab ${kMatchFilter===x[0]?'active':''}" onclick="kSetMatchFilter('${x[0]}')">${x[1]}</button>`).join('');
+  const h=document.getElementById('kMatchesTabs');
+  if(!h) return;
+
+  h.innerHTML=[
+    ['all','الكل'],
+    ['live','🔴 مباشر الآن'],
+    ['upcoming','لم تبدأ'],
+    ['finished','النتائج النهائية']
+  ].map(x=>`
+    <button class="k-qtab ${kMatchFilter===x[0]?'active':''}"
+      onclick="kSetMatchFilter('${x[0]}')">${x[1]}</button>
+  `).join('');
 }
-function kSetMatchFilter(v){kMatchFilter=v;kRenderQuickTabs();kRenderMatchesV3()}
-function kSetMatchSearch(v){kMatchSearch=v||'';kRenderMatchesV3()}
+
+function kSetMatchFilter(v){
+  kMatchFilter=v;
+  kRenderQuickTabs();
+  kRenderMatchesV3();
+}
+
+function kSetMatchSearch(v){
+  kMatchSearch=v||'';
+  kRenderMatchesV3();
+}
+
+function kSetWeeklyReport(mode){
+  kWeeklyReportMode=mode;
+  document.querySelectorAll('#kWeeklyReportTabs button').forEach(b=>b.classList.remove('active'));
+  const map={today:'اليوم',tomorrow:'غداً',week:'طيلة الأسبوع',uefa:'UEFA'};
+  const btn=[...document.querySelectorAll('#kWeeklyReportTabs button')].find(b=>b.textContent.trim()===map[mode]);
+  if(btn) btn.classList.add('active');
+  kRenderMatchesV3();
+}
+
+function kWeeklyReportFixtures(){
+    return kLocalFixturesForMode(kWeeklyReportMode);
+}
+
 function kRenderMatchesV3(){
- const host=document.getElementById('kMatches'); if(!host)return;
- let list=kMatchesFiltered(kikonMatchesCache||[]);
- if(kMatchSearch.trim()) list.sort((a,b)=>kSearchScore(b,kMatchSearch.trim().toLocaleLowerCase())-kSearchScore(a,kMatchSearch.trim().toLocaleLowerCase()));
- else{
-   const live=list.filter(kFixtureLive);
-   const upcoming=list.filter(f=>!kFixtureLive(f)&&!['FT','AET','PEN'].includes(String(f.fixture?.status?.short||'')));
-   const finished=list.filter(f=>['FT','AET','PEN'].includes(String(f.fixture?.status?.short||'')));
-   live.sort((a,b)=>kLeagueScore(b)-kLeagueScore(a)||kCountryScore(b)-kCountryScore(a));
-   upcoming.sort((a,b)=>new Date(a.fixture?.date||0)-new Date(b.fixture?.date||0));
-   finished.sort((a,b)=>new Date(b.fixture?.date||0)-new Date(a.fixture?.date||0));
-   list=[...live,...upcoming,...finished];
- }
- host.innerHTML=list.length?list.map(kMatchCard).join(''):'<div class="k-empty">لا توجد مباريات مطابقة.</div>';
+  const host=document.getElementById('matchesList');
+  if(!host) return;
+  let list=(kWeeklyReportMode ? kLocalFixturesForMode(kWeeklyReportMode) : (kikonMatchesCache||[]));
+  const q=kMatchSearch.trim().toLocaleLowerCase();
+  if(q) list=list.filter(f=>kMatchSearchText(f).includes(q)).sort((a,b)=>kSearchScore(b,q)-kSearchScore(a,q));
+
+  if(kWeeklyReportMode==='week' || kWeeklyReportMode==='uefa'){
+    list.sort((a,b)=>kMatchInstant(a.fixture?.date)-kMatchInstant(b.fixture?.date));
+    const groups=new Map();
+    list.forEach(f=>{const d=kLocalDateKey(f);if(!groups.has(d))groups.set(d,[]);groups.get(d).push(f);});
+    let out='';
+    for(const [date,items] of groups){
+      out+=`<div class="matches-day-header">📅 ${kEsc(kLocalDayName(date))} <span>${items.length} مباراة</span></div>`;
+      out+=`<div class="matches-row">${items.map(kMatchCard).join('')}</div>`;
+    }
+    host.innerHTML=out||'<div class="k-empty">لا توجد مباريات في هذا التصنيف.</div>';
+    return;
+  }
+
+  const live=list.filter(kFixtureLive);
+  const upcoming=list.filter(f=>!kFixtureLive(f)&&!['FT','AET','PEN'].includes(kEffectiveStatus(f)));
+  const finished=list.filter(f=>['FT','AET','PEN'].includes(kEffectiveStatus(f)));
+  live.sort((a,b)=>kLeagueScore(b)-kLeagueScore(a)||kCountryScore(b)-kCountryScore(a));
+  upcoming.sort((a,b)=>kMatchInstant(a.fixture?.date)-kMatchInstant(b.fixture?.date));
+  finished.sort((a,b)=>kMatchInstant(b.fixture?.date)-kMatchInstant(a.fixture?.date));
+  list=[...live,...upcoming,...finished];
+
+  let out='';
+  if(live.length) out+=`<div class="matches-day-header live-header">🔴 مباشر الآن <span>${live.length}</span></div><div class="matches-row">${live.map(kMatchCard).join('')}</div>`;
+  if(upcoming.length) out+=`<div class="matches-day-header">🕐 المباريات القادمة اليوم <span>${upcoming.length}</span></div><div class="matches-row">${upcoming.map(kMatchCard).join('')}</div>`;
+  if(finished.length) out+=`<div class="matches-day-header">✅ النتائج النهائية <span>${finished.length}</span></div><div class="matches-row">${finished.map(kMatchCard).join('')}</div>`;
+  host.innerHTML=out||'<div class="k-empty">لا توجد مباريات مطابقة.</div>';
 }
+
 function kEnsureMatchUI(){
- const root=document.getElementById('kMatches'); if(!root)return;
- if(!document.getElementById('kMatchControls')){
-   const c=document.createElement('div'); c.id='kMatchControls';
-   c.innerHTML='<div class="k-match-search"><input id="kMatchSearchInput" type="search" placeholder="ابحث عن مباراة، فريق، بطولة أو قناة..." oninput="kSetMatchSearch(this.value)"></div><div id="kMatchesTabs" class="k-qtabs"></div>';
-   root.parentNode.insertBefore(c,root);
- }
- kRenderQuickTabs();
+  const root=document.getElementById('matchesList');
+  if(!root) return;
+
+  if(!document.getElementById('kMatchControls')){
+    const c=document.createElement('div');
+    c.id='kMatchControls';
+
+    c.innerHTML=`
+      <div class="k-match-search">
+        <input id="kMatchSearchInput" type="search"
+          placeholder="ابحث عن مباراة، فريق أو بطولة..."
+          oninput="kSetMatchSearch(this.value)">
+      </div>
+      <div id="kWeeklyReportTabs" class="k-qtabs">
+        <button type="button" class="active" onclick="kSetWeeklyReport('today')">اليوم</button>
+        <button type="button" onclick="kSetWeeklyReport('tomorrow')">غداً</button>
+        <button type="button" onclick="kSetWeeklyReport('week')">طيلة الأسبوع</button>
+        <button type="button" onclick="kSetWeeklyReport('uefa')">UEFA</button>
+      </div>
+      <div id="kMatchesTabs" class="k-qtabs"></div>
+    `;
+
+    root.parentNode.insertBefore(c,root);
+  }
+
+  kRenderQuickTabs();
 }
-function kSaveMatchesCache(list){try{localStorage.setItem(KIKON_CACHE_KEY,JSON.stringify({ts:Date.now(),data:list}))}catch(e){}}
-function kLoadMatchesCache(){
- try{const o=JSON.parse(localStorage.getItem(KIKON_CACHE_KEY)||'null');return o&&Array.isArray(o.data)&&Date.now()-o.ts<=KIKON_CACHE_TTL?o.data:null}catch(e){return null}
+
+
+/* =========================================================
+   KIKON PROFESSIONAL RIGHTS PACKS
+   مصدر البيانات: channelsData + KIKON_LEAGUE_CHANNEL_RULES فقط.
+   الهدف: عرض القنوات التي لها حقوق بطولة داخل الملف كباقات مرتبة.
+   ========================================================= */
+function kRightsProvider(name){
+  const n=String(name||'').toLowerCase();
+  const rules=[
+    [/bein|be in/, 'beIN SPORTS'],[/dazn/, 'DAZN'],[/canal|mycanal/, 'CANAL+'],[/sky/, 'Sky Sports'],
+    [/ssc/, 'SSC Sports'],[/alkass/, 'الكأس الرياضية'],[/on ?time|ontime/, 'ON Time Sports'],
+    [/arryadia|الرياضية/, 'Arryadia'],[/abu dhabi/, 'Abu Dhabi Sports'],[/dubai sports/, 'Dubai Sports'],
+    [/espn/, 'ESPN'],[/fox/, 'FOX Sports'],[/tnt/, 'TNT Sports'],[/nbc/, 'NBC Sports'],
+    [/apple tv/, 'Apple TV'],[/ziggo/, 'Ziggo Sport'],[/sport ?tv/, 'Sport TV'],[/movistar/, 'Movistar'],
+    [/rai/, 'RAI Sport'],[/mediaset/, 'Mediaset'],[/zdf|ard|sat\.1/, 'ZDF / ARD / Sat.1'],
+    [/super ?sport/, 'SuperSport'],[/astro/, 'Astro SuperSport'],[/sony ten/, 'Sony TEN'],[/star sports/, 'Star Sports'],
+    [/tv2|tv 2|tv3|viaplay|eurosport/, 'Nordic Sports'],[/rds|sportsnet|tsn|tva sports/, 'Canada Sports'],
+    [/match football|match premier|match tv/, 'Match TV Russia'],[/one 1|sport 1 israel|sport 5/, 'Sport Israel']
+  ];
+  for(const [rx,label] of rules) if(rx.test(n)) return label;
+  return String(name||'شبكة رياضية');
 }
-function kBootCachedMatches(){
- const c=kLoadMatchesCache(); if(c){kikonMatchesCache=c;kEnsureMatchUI();kRenderMatchesV3()}
+
+function kRightsNorm(v){
+  return String(v||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\\u0600-\\u06ff]+/g,' ').replace(/\\s+/g,' ').trim();
 }
-function kStartSmartPolling(){
- if(kPollingTimer)clearTimeout(kPollingTimer);
- const delay=(kikonMatchesCache||[]).some(kFixtureLive)?45000:120000;
- kPollingTimer=setTimeout(async()=>{try{
-   if(typeof loadKikonMatches==='function')await loadKikonMatches();
-   kSaveMatchesCache(kikonMatchesCache||[]);kEnsureMatchUI();kRenderMatchesV3();
- }finally{kStartSmartPolling()}},delay);
+
+function kRightsChannelMap(){
+  const map=new Map();
+  kChannelCatalog().forEach(ch=>map.set(kRightsNorm(ch.name),ch));
+  return map;
 }
-document.addEventListener('DOMContentLoaded',()=>{kBootCachedMatches();kEnsureMatchUI();setTimeout(kStartSmartPolling,1000)});
-/* Keep cinema/player session alive: clicking close must not stop the current player or navigate away. */
+
+function kRightsBuildPacks(){
+  const catalog=kRightsChannelMap();
+  const packs=new Map();
+  const ruleList=kAllLeagueChannelRules();
+  ruleList.forEach(rule=>{
+    const rightsLabel=(rule.aliases||[])[0]||rule.key;
+    (rule.channels||[]).forEach(channelName=>{
+      const ch=catalog.get(kRightsNorm(channelName));
+      if(!ch) return;
+      const provider=kRightsProvider(ch.name);
+      if(!packs.has(provider)) packs.set(provider,{name:provider,channels:new Map(),rights:new Map(),score:0});
+      const pack=packs.get(provider);
+      pack.channels.set(ch.id,ch);
+      if(!pack.rights.has(rule.key)) pack.rights.set(rule.key,{label:rightsLabel,aliases:rule.aliases||[]});
+      pack.score += 1;
+    });
+  });
+  return [...packs.values()].sort((a,b)=>b.rights.size-a.rights.size||b.channels.size-a.channels.size||a.name.localeCompare(b.name));
+}
+
+function renderKikonRightsPacks(query=''){
+  const host=document.getElementById('kikonRightsPacksList');
+  if(!host) return;
+  const q=kRightsNorm(query);
+  let packs=kRightsBuildPacks();
+  if(q){
+    packs=packs.filter(pack=>{
+      const text=[pack.name,...[...pack.channels.values()].map(c=>c.name),...[...pack.rights.values()].flatMap(r=>[r.label,...r.aliases])].join(' ');
+      return kRightsNorm(text).includes(q);
+    });
+  }
+  const total=packs.reduce((n,p)=>n+p.channels.size,0);
+  const counter=document.getElementById('rightsPackCount');
+  if(counter) counter.textContent=`${packs.length} باقة · ${total} قناة مرتبطة بالحقوق`;
+  if(!packs.length){host.innerHTML='<div class="kikon-pack-empty">لا توجد باقة مطابقة للبحث.</div>';return;}
+  host.innerHTML=packs.map(pack=>{
+    const channels=[...pack.channels.values()].sort((a,b)=>a.name.localeCompare(b.name));
+    const rights=[...pack.rights.values()].sort((a,b)=>a.label.localeCompare(b.label));
+    return `<article class="kikon-pack">
+      <div class="kikon-pack-top"><div class="kikon-pack-name">${kEsc(pack.name)}</div><div class="kikon-pack-count">${channels.length} قناة · ${rights.length} بطولة</div></div>
+      <div class="kikon-pack-channels">${channels.map(ch=>`<button class="kikon-pack-channel" type="button" onclick="playChannel(${Number(ch.id)},null)">▶ ${kEsc(ch.name)}</button>`).join('')}</div>
+      <div class="kikon-pack-rights">${rights.map(r=>`<span class="kikon-right-chip">🏆 ${kEsc(r.label)}</span>`).join('')}</div>
+    </article>`;
+  }).join('');
+}
+
+function kInitRightsPacks(){
+  try{ renderKikonRightsPacks(''); }catch(e){ console.error('Rights packs:',e); }
+}
+
+
+/* LOCAL BOOT */
+document.addEventListener('DOMContentLoaded',()=>{kBootLocalMatches();kStartSmartPolling();kInitRightsPacks();});
+
+/* KIKON V5 — keep the match card/player session open.
+   Clicking a channel replaces the current channel without closing the card. */
 document.addEventListener('click',e=>{
- const b=e.target.closest('[data-cinema-close],.cinema-close,#cinemaClose,.close-cinema');
- if(!b)return;e.preventDefault();e.stopPropagation();
- const o=b.closest('.cinema-overlay,.cinema-modal'); if(o)o.classList.remove('open','active','show');
+  const channel=e.target.closest('.match-channel,[data-match-channel]');
+  if(channel){
+    const card=channel.closest('.match-tile');
+    if(card) card.classList.add('open');
+  }
+
+  const close=e.target.closest('[data-cinema-close],.cinema-close,#cinemaClose,.close-cinema');
+  if(close){
+    e.preventDefault();
+    e.stopPropagation();
+    const card=close.closest('.match-tile');
+    if(card) card.classList.add('open');
+  }
 },true);
 </script></body>
 </html>
