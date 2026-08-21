@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
+    <<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KiKON-tv ULTRA V69</title>
+    <title>Kikon-tv</title>
     <style>
         :root {
-            --bg: #030712;
-            --sidebar-bg: #0f172a;
+            --bg: #090d16;
+            --sidebar-bg: #111827;
             --card-bg: #1e293b;
             --primary: #2563eb;
-            --accent: #facc15;
-            --text-main: #ffffff;
+            --accent: #f59e0b;
+            --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --danger: #ef4444;
-            --focus-border: #facc15;
+            --focus-border: #f59e0b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -27,10 +27,10 @@
         }
 
         /* Top Bar */
-        .header { background: var(--sidebar-bg); padding: 8px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #334155; flex-shrink: 0; height: 50px; }
+        .header { background: var(--sidebar-bg); padding: 8px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #1f293d; flex-shrink: 0; height: 50px; }
         .logo { color: var(--accent); font-weight: 900; font-size: 1.2rem; letter-spacing: 1px; }
-        .search-bar { flex: 1; background: #1e293b; border: 1px solid #475569; color: #ffffff; padding: 6px 12px; border-radius: 6px; outline: none; font-size: 0.85rem; }
-        .view-btn { background: #1e293b; color: #ffffff; border: 1px solid #475569; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+        .search-bar { flex: 1; background: #1b2436; border: 1px solid #334155; color: #ffffff; padding: 6px 12px; border-radius: 6px; outline: none; font-size: 0.85rem; }
+        .view-btn { background: #1b2436; color: #ffffff; border: 1px solid #334155; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
         .view-btn.active { background: var(--primary); border-color: var(--accent); color: #ffffff; }
 
         /* Video Area */
@@ -63,13 +63,13 @@
 
         /* Player Controls */
         .player-controls {
-            height: 48px; background: #0b1329; border-top: 2px solid #1e293b;
+            height: 48px; background: #0d1527; border-top: 2px solid #1e293b;
             display: flex; align-items: center; justify-content: space-between; padding: 0 8px; gap: 6px; flex-shrink: 0; z-index: 30;
         }
 
         .control-group { display: flex; align-items: center; gap: 6px; }
         .ctrl-btn { 
-            background: #1e293b; color: #ffffff; border: 1px solid #475569; 
+            background: #1e293b; color: #ffffff; border: 1px solid #334155; 
             padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; 
             display: flex; align-items: center; gap: 4px; white-space: nowrap; transition: 0.2s;
         }
@@ -78,15 +78,15 @@
         /* Layout & Expanded Sidebar */
         .main-ui { flex: 1; display: flex; overflow: hidden; }
         
-        .sidebar { width: 260px; background: var(--sidebar-bg); border-left: 2px solid #334155; display: flex; flex-direction: column; height: 100%; flex-shrink: 0; }
+        .sidebar { width: 260px; background: var(--sidebar-bg); border-left: 2px solid #1f293d; display: flex; flex-direction: column; height: 100%; flex-shrink: 0; }
         
         /* أزرار التنقل بالماوس */
         .nav-scroll-btn {
-            background: #1e293b;
+            background: #1b2436;
             color: var(--accent);
             border: none;
-            border-bottom: 1px solid #334155;
-            border-top: 1px solid #334155;
+            border-bottom: 1px solid #1f293d;
+            border-top: 1px solid #1f293d;
             padding: 8px;
             font-weight: bold;
             font-size: 0.85rem;
@@ -102,17 +102,17 @@
         #regSide::-webkit-scrollbar { width: 5px; }
         #regSide::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 
-        .secret-box-btn { width: 100%; height: 24px; background: #0f172a; cursor: pointer; border: none; flex-shrink: 0; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: center; }
+        .secret-box-btn { width: 100%; height: 24px; background: #0d1527; cursor: pointer; border: none; flex-shrink: 0; border-bottom: 1px solid #1e293b; display: flex; align-items: center; justify-content: center; }
         .secret-square { width: 12px; height: 12px; background: #334155; border-radius: 2px; }
         .secret-box-btn.active .secret-square { background: #f43f5e; box-shadow: 0 0 8px #f43f5e; }
 
         /* Package Buttons */
         .group-btn { 
-            width: 100%; padding: 12px 10px; border: 1px solid #334155; border-radius: 8px; 
+            width: 100%; padding: 12px 10px; border: 1px solid #28354a; border-radius: 8px; 
             color: #ffffff; text-align: right; cursor: pointer; font-weight: bold; font-size: 0.85rem; 
-            background: #1e293b; transition: 0.2s; flex-shrink: 0;
+            background: #1b2436; transition: 0.2s; flex-shrink: 0;
         }
-        .group-btn:hover { background: #334155; }
+        .group-btn:hover { background: #28354a; }
         .group-btn.active { background: var(--primary) !important; color: #ffffff !important; border-color: var(--accent) !important; border-right: 5px solid var(--accent); }
 
         .grid-container { flex: 1; height: 100%; overflow-y: auto; padding: 10px; position: relative; background: var(--bg); }
@@ -120,11 +120,11 @@
         
         /* Channel Card Base */
         .ch-card { 
-            position: relative; color: #ffffff; border: 1px solid #334155; padding: 10px 6px; 
+            position: relative; color: #ffffff; border: 1px solid #28354a; padding: 10px 6px; 
             border-radius: 8px; cursor: pointer; font-size: 0.78rem; font-weight: bold; 
             text-align: center; min-height: 56px; display: flex; align-items: center; 
             justify-content: center; word-break: break-word; user-select: none; overflow: hidden;
-            background: #1e293b; transition: 0.15s;
+            background: #1b2436; transition: 0.15s;
         }
         .ch-card.active { background: linear-gradient(135deg, #059669, #10b981) !important; border-color: #ffffff !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
 
@@ -132,7 +132,7 @@
         #keypadLock { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center; }
         .pin-display { font-size: 2.2rem; letter-spacing: 12px; margin-bottom: 15px; color: var(--accent); font-weight: bold; }
         .key-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .key { width: 60px; height: 55px; background: #1e293b; border: 2px solid var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; cursor: pointer; color: #ffffff; }
+        .key { width: 60px; height: 55px; background: #1b2436; border: 2px solid var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; cursor: pointer; color: #ffffff; }
 
         #loader { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index:900; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -154,10 +154,10 @@
 .matches-head h2{font-size:1rem;color:var(--accent)}
 .matches-status{font-size:.72rem;color:var(--text-sub)}
 .matches-error{background:#3f1d1d;border:1px solid #ef4444;border-radius:8px;padding:9px;font-size:.75rem;margin-bottom:10px}
-.matches-country{font-size:.9rem;font-weight:900;color:var(--accent);padding:7px 4px 5px;border-bottom:1px solid #334155;margin-top:7px}
-.matches-league{background:#111827;border:1px solid #334155;border-radius:8px;padding:6px 9px;font-size:.76rem;font-weight:800;margin-top:6px}
+.matches-country{font-size:.9rem;font-weight:900;color:var(--accent);padding:7px 4px 5px;border-bottom:1px solid #28354a;margin-top:7px}
+.matches-league{background:#0d1527;border:1px solid #28354a;border-radius:8px;padding:6px 9px;font-size:.76rem;font-weight:800;margin-top:6px}
 .matches-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:7px 0 10px;direction:rtl}
-.match-tile{position:relative;background:var(--card-bg);border:1px solid #334155;border-radius:9px;padding:8px;min-height:150px;cursor:pointer;transition:.15s;overflow:hidden}
+.match-tile{position:relative;background:var(--card-bg);border:1px solid #28354a;border-radius:9px;padding:8px;min-height:150px;cursor:pointer;transition:.15s;overflow:hidden}
 .match-tile:hover{border-color:var(--accent)}
 .match-tile.live{border-color:#22c55e;box-shadow:0 0 0 1px rgba(34,197,94,.18)}
 .match-time{text-align:center;font-size:.72rem;font-weight:800}
@@ -167,47 +167,46 @@
 .match-team img{display:block;width:28px;height:28px;object-fit:contain;margin:0 auto 3px}
 .match-score{font-size:1rem;font-weight:900;direction:ltr;min-width:45px}
 .match-meta{text-align:center;color:var(--text-sub);font-size:.56rem;margin-top:3px}
-.match-channels{display:none;border-top:1px solid #334155;margin-top:6px;padding-top:6px}
+.match-channels{display:none;border-top:1px solid #28354a;margin-top:6px;padding-top:6px}
 .match-tile.open .match-channels{display:block}
 .match-channel-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
-.match-channel{display:flex;align-items:center;gap:4px;background:#0f172a;color:#fff;border:1px solid #475569;border-radius:6px;padding:4px;cursor:pointer;font-size:.58rem;min-width:0}
+.match-channel{display:flex;align-items:center;gap:4px;background:#0d1527;color:#fff;border:1px solid #334155;border-radius:6px;padding:4px;cursor:pointer;font-size:.58rem;min-width:0}
 .match-channel img{width:22px;height:22px;object-fit:contain;flex:0 0 auto}
 .match-channel span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .match-note{font-size:.54rem;color:var(--text-sub);margin-bottom:4px}
 .match-cinema{display:none;position:absolute;inset:0;background:#000;z-index:15;align-items:center;justify-content:center}
 .match-tile.cinema .match-cinema{display:flex}
-.match-cinema button{position:absolute;top:5px;left:5px;z-index:20;background:rgba(0,0,0,.8);color:#fff;border:1px solid #475569;border-radius:5px;padding:4px 7px;cursor:pointer}
+.match-cinema button{position:absolute;top:5px;left:5px;z-index:20;background:rgba(0,0,0,.8);color:#fff;border:1px solid #334155;border-radius:5px;padding:4px 7px;cursor:pointer}
 .match-cinema-text{color:#fff;text-align:center;padding:15px;font-size:.72rem}
-.matches-channels-box{margin-top:14px;border-top:2px solid #334155;padding-top:8px}
+.matches-channels-box{margin-top:14px;border-top:2px solid #28354a;padding-top:8px}
 .player-media-hint{position:absolute;top:10px;right:12px;z-index:5;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.15);padding:6px 10px;border-radius:10px;font-size:.78rem;color:#e5e7eb;pointer-events:none}
 .kikon-rights-packs{margin:12px 0 18px!important}
 .channels-tools{display:flex;gap:6px;align-items:center;margin:6px 0}
-.channels-tools input{flex:1;background:#111827;color:#fff;border:1px solid #475569;border-radius:7px;padding:7px 9px;font-size:.72rem}
-.channels-tools button{background:#1e293b;color:#fff;border:1px solid #475569;border-radius:7px;padding:7px 10px;cursor:pointer}
-.broadcast-country{font-weight:900;color:var(--accent);font-size:.78rem;padding:6px 2px;border-bottom:1px solid #334155;margin-top:6px}
+.channels-tools input{flex:1;background:#0d1527;color:#fff;border:1px solid #334155;border-radius:7px;padding:7px 9px;font-size:.72rem}
+.channels-tools button{background:#1b2436;color:#fff;border:1px solid #334155;border-radius:7px;padding:7px 10px;cursor:pointer}
+.broadcast-country{font-weight:900;color:var(--accent);font-size:.78rem;padding:6px 2px;border-bottom:1px solid #28354a;margin-top:6px}
 .broadcast-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:5px 0}
-.broadcast-card{display:flex;align-items:center;gap:5px;background:var(--card-bg);border:1px solid #334155;color:#fff;border-radius:7px;padding:6px;cursor:pointer;min-width:0;text-align:right}
+.broadcast-card{display:flex;align-items:center;gap:5px;background:var(--card-bg);border:1px solid #28354a;color:#fff;border-radius:7px;padding:6px;cursor:pointer;min-width:0;text-align:right}
 .broadcast-card img{width:25px;height:25px;object-fit:contain;flex:0 0 auto}
 .broadcast-card span{font-size:.61rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:1150px){.matches-row{grid-template-columns:repeat(3,minmax(0,1fr))}.broadcast-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:700px){.matches-row{grid-template-columns:repeat(2,minmax(0,1fr))}.broadcast-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:460px){.matches-row,.broadcast-grid{grid-template-columns:1fr}}
 
-.match-channel-unavailable{cursor:default;opacity:.72;border-style:dashed}.match-channel-rights{border-color:#22c55e}.match-channel-unavailable span{white-space:normal}.k-qtabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.k-qtabs button{cursor:pointer;border:1px solid #475569;background:#1e293b;color:#fff;border-radius:7px;padding:6px 9px}.k-qtabs button.active{outline:2px solid #16a34a}
+.match-channel-unavailable{cursor:default;opacity:.72;border-style:dashed}.match-channel-rights{border-color:#22c55e}.match-channel-unavailable span{white-space:normal}.k-qtabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}.k-qtabs button{cursor:pointer;border:1px solid #334155;background:#1b2436;color:#fff;border-radius:7px;padding:6px 9px}.k-qtabs button.active{outline:2px solid #16a34a}
 .k-qtabs button[onclick*="uefa"]{font-weight:900}
 
 /* KIKON PROFESSIONAL RIGHTS PACKS */
-.kikon-rights-packs{margin-top:22px;padding:18px;border-top:1px solid #243044;background:linear-gradient(180deg,#0b1220,#0a101b);border-radius:16px}
+.kikon-rights-packs{margin-top:22px;padding:18px;border-top:1px solid #1f293d;background:linear-gradient(180deg,#0d1527,#0a101b);border-radius:16px}
 .kikon-rights-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
 .kikon-rights-head h2{margin:0;font-size:1.15rem}.kikon-rights-head p{margin:4px 0 0;color:#94a3b8;font-size:.78rem}
 .kikon-rights-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.kikon-rights-tools input{flex:1;min-width:220px}
 .kikon-pack-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
-.kikon-pack{border:1px solid #263348;background:#0d1625;border-radius:14px;padding:13px;box-shadow:0 8px 22px rgba(0,0,0,.18)}
-.kikon-pack-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.kikon-pack-name{font-weight:900;font-size:1rem}.kikon-pack-count{font-size:.7rem;color:#cbd5e1;background:#162235;padding:4px 7px;border-radius:999px}
-.kikon-pack-channels{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.kikon-pack-channel{display:inline-flex;align-items:center;gap:5px;border:1px solid #334155;background:#111c2e;color:#e2e8f0;border-radius:9px;padding:6px 8px;font-size:.72rem;cursor:pointer}.kikon-pack-channel:hover{border-color:#64748b;transform:translateY(-1px)}
-.kikon-pack-rights{display:flex;flex-wrap:wrap;gap:5px}.kikon-right-chip{font-size:.67rem;color:#a5f3fc;background:#0b2530;border:1px solid #164e63;padding:4px 7px;border-radius:999px}.kikon-pack-empty{padding:18px;text-align:center;color:#94a3b8}
+.kikon-pack{border:1px solid #28354a;background:#0d1527;border-radius:14px;padding:13px;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.kikon-pack-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.kikon-pack-name{font-weight:900;font-size:1rem}.kikon-pack-count{font-size:.7rem;color:#cbd5e1;background:#1b2436;padding:4px 7px;border-radius:999px}
+.kikon-pack-channels{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.kikon-pack-channel{display:inline-flex;align-items:center;gap:5px;border:1px solid #334155;background:#131d30;color:#e2e8f0;border-radius:999px;padding:6px 10px;font-size:.72rem;cursor:pointer}.kikon-pack-channel:hover{border-color:#64748b;transform:translateY(-1px)}
+.kikon-pack-rights{display:flex;flex-wrap:wrap;gap:5px}.kikon-right-chip{font-size:.67rem;color:#a5f3fc;background:#062836;border:1px solid #0e7490;padding:4px 7px;border-radius:999px}.kikon-pack-empty{padding:18px;text-align:center;color:#94a3b8}
 .kikon-rights-note{margin-top:12px;color:#64748b;font-size:.68rem;line-height:1.6}
-
 </style>
 
 <style id="kikon-v4-channel-switch">
@@ -218,6 +217,12 @@
 }
 .match-channel{transition:all .15s ease}
 .match-cinema{display:none!important}
+</style>
+<style id="kikon-v68-ad-click-fix">
+/* V6.8: لا نسمح بتحويل الضغطات المتكررة إلى فتح نوافذ/تنقلات من المشغل. */
+#playerContainer{position:relative;}
+#mainPlayer{position:relative;z-index:2;}
+#kikonPlayerNotice{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);z-index:10;display:none;pointer-events:none;background:rgba(0,0,0,.78);color:#fff;padding:7px 11px;border-radius:9px;font:12px/1.3 sans-serif;}
 </style>
 </head>
 <body>
@@ -233,7 +238,7 @@
     <div id="loader"><div style="border:3px solid #fff; border-top:3px solid var(--primary); border-radius:50%; width:30px; height:30px; animation: spin 0.8s linear infinite;"></div></div>
     
     <div class="kikon-shield">KiKON-tv ULTRA</div>
-    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"></iframe>
+    <iframe id="mainPlayer" src="" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
     
     <div id="playerMediaHint" class="player-media-hint">🔊 الصوت والفيديو من مصدر البث الأصلي</div>
 
@@ -981,33 +986,116 @@ const KIKON_CHANNEL_ALIASES = new Map([
   ['beinsports hd 7','beIN Sports 7 Arabic'],
   ['beinsports mena english 1','beIN Sports MENA English 1'],
   ['beinsports mena english 2','beIN Sports MENA English 2'],
-
-  ['beinsports','beIN SPORTS'],
-  ['bein sports','beIN SPORTS'],
-  ['bein sports arabic','beIN Sports'],
-  ['bein sports mena','beIN Sports MENA'],
+  ['beinsports 1 fr','beIN SPORTS 1 France'],
+  ['beinsports 2 fr','beIN SPORTS 2 France'],
+  ['beinsports 3 fr','beIN SPORTS 3 France'],
+  ['beinsports max 4 fr','beIN Sports MAX 4 France'],
+  ['beinsports max 5 fr','beIN Sports MAX 5 France'],
+  ['beinsports max 6 fr','beIN Sports MAX 6 France'],
+  ['beinsports max 7 fr','beIN Sports MAX 7 France'],
+  ['beinsports max 8 fr','beIN Sports MAX 8 France'],
+  ['beinsports max 9 fr','beIN Sports MAX 9 France'],
+  ['beinsports max 10 fr','beIN Sports MAX 10 France'],
+  ['dazn 1 fr','DAZN 1 Spain'],
+  ['dazn.com fr','DAZN Ligue 1 France'],
+  ['dazn france','DAZN Ligue 1 France'],
+  ['canal plus','Canal+ France'],
+  ['canal plus foot','Canal+ Foot France'],
+  ['canal foot','Canal+ Foot France'],
+  ['canal plus sport','Canal+ Sport France'],
+  ['mycanal','Canal+ France'],
+  ['bein sports fr','beIN SPORTS 1 France'],
+  ['bein sports arabic','beIN Sports 1 Arabic'],
+  ['beinsports','beIN SPORTS 1 France'],
+  ['bein sports','beIN SPORTS 1 France'],
+  ['bein sports mena','beIN Sports MENA English 1'],
   ['espn','ESPN'],
   ['espn usa','ESPN USA'],
   ['espn2','ESPN2'],
   ['espn2 usa','ESPN2 USA'],
   ['fox sports 1','Fox Sports 1 USA'],
   ['fox sports 2','Fox Sports 2 USA'],
-  ['tnt sports','TNT Sports'],
+  ['tnt sports','TNT Sports 1 UK'],
   ['sky sports football','Sky Sports Football UK'],
-  ['canal plus foot','Canal+ Foot France']
+  ['sky sports premier league','Sky sports Premier League']
 ]);
+
+const KIKON_CHANNEL_ALIASES_NORMALIZED = new Map(
+  [...KIKON_CHANNEL_ALIASES.entries()].map(([k,v])=>[kNormalizeChannelName(k),v])
+);
+
+function kAliasTarget(name){
+  return KIKON_CHANNEL_ALIASES_NORMALIZED.get(kNormalizeChannelName(name)) || null;
+}
+
+/* V6.9.1 PERFORMANCE CACHE: يمنع إعادة حساب المطابقة لكل بطاقة عند عرض الأسبوع. */
+let KIKON_CHANNEL_CATALOG_CACHE=null;
+const KIKON_SMART_MATCH_CACHE=new Map();
+const KIKON_SOURCE_REPORT_CACHE=new Map();
+function kCachedChannelCatalog(){
+  if(!KIKON_CHANNEL_CATALOG_CACHE) KIKON_CHANNEL_CATALOG_CACHE=kChannelCatalog();
+  return KIKON_CHANNEL_CATALOG_CACHE;
+}
+function kClearMatchRenderCaches(){
+  KIKON_SMART_MATCH_CACHE.clear();
+  KIKON_SOURCE_REPORT_CACHE.clear();
+  KIKON_CHANNEL_CATALOG_CACHE=null;
+}
+
+/* V6.9 SMART MATCH: مطابقة مرنة لكن مقيدة بالقناة الموجودة فعلياً في channelsData. */
+function kSmartTokens(name){
+  return kNormalizeChannelName(name)
+    .split(' ')
+    .filter(t=>t && !['fr','france','uk','arabic','hd','fhd','uhd','sd','tv','channel','canal'].includes(t));
+}
+function kSmartChannelCandidates(targetName){
+  const rawKey=String(targetName||'').trim().toLocaleLowerCase();
+  if(KIKON_SMART_MATCH_CACHE.has(rawKey)) return KIKON_SMART_MATCH_CACHE.get(rawKey);
+  const all=kCachedChannelCatalog();
+  const raw=String(targetName||'').trim();
+  if(!raw) return [];
+  const exact=all.filter(ch=>kNormalizeChannelName(ch.name)===kNormalizeChannelName(raw));
+  if(exact.length) return exact;
+  const alias=kAliasTarget(raw);
+  if(alias){
+    const a=all.filter(ch=>kNormalizeChannelName(ch.name)===kNormalizeChannelName(alias));
+    if(a.length) return a;
+  }
+  const tokens=kSmartTokens(raw);
+  if(!tokens.length) return [];
+  const scored=all.map(ch=>{
+    const cn=kNormalizeChannelName(ch.name);
+    const hit=tokens.filter(t=>cn.includes(t));
+    const allHit=hit.length===tokens.length;
+    if(!allHit) return null;
+    let score=hit.length*20;
+    if(/\d+/.test(raw)){
+      const nums=raw.match(/\d+/g)||[];
+      nums.forEach(n=>{if(new RegExp('\\b'+n+'\\b').test(cn))score+=30;});
+    }
+    if(/max/.test(cn)&&/max/.test(kNormalizeChannelName(raw)))score+=20;
+    if(/dazn/.test(cn)&&/dazn/.test(kNormalizeChannelName(raw)))score+=15;
+    if(/canal/.test(cn)&&/canal/.test(kNormalizeChannelName(raw)))score+=15;
+    return {ch,score};
+  }).filter(Boolean).sort((a,b)=>b.score-a.score||a.ch.name.localeCompare(b.ch.name));
+  const result=scored.map(x=>x.ch);
+  KIKON_SMART_MATCH_CACHE.set(rawKey,result);
+  return result;
+}
+function findSmartChannelMatch(targetName){
+  const candidates=kSmartChannelCandidates(targetName);
+  if(candidates.length) return {type:'smart',channel:candidates[0],suggestions:candidates.slice(0,8)};
+  return {type:'not_found',channel:null,suggestions:[]};
+}
 
 function kChannelNamesMatch(apiName,catalogName){
     const a=kNormalizeChannelName(apiName);
-    const b=kNormalizeChannelName(catalogName);
+    const b=kNormalizeChannelName(typeof catalogName==='string'?catalogName:catalogName?.name);
     if(!a || !b) return false;
-
     if(a===b) return true;
-
-    const alias=KIKON_CHANNEL_ALIASES.get(a);
+    const alias=kAliasTarget(apiName);
     if(alias && kNormalizeChannelName(alias)===b) return true;
-
-    return false;
+    return kSmartChannelCandidates(apiName).some(ch=>kNormalizeChannelName(ch.name)===b);
 }
 
 function kUniqueChannels(list){
@@ -1022,7 +1110,7 @@ function kUniqueChannels(list){
 }
 
 function kFindChannels(fixture){
-    const all=kChannelCatalog();
+    const all=kCachedChannelCatalog();
     if(!all.length) return [];
 
     /* المصدر المكتوب للمباراة له الأولوية: القنوات المذكورة في ملف الجدول. */
@@ -1319,21 +1407,32 @@ function kUEFAFallbackNames(f){
 }
 
 function kSourceChannelReport(f){
-    const catalog=kChannelCatalog();
+    const cacheKey=String(f.fixture?.id||f._matchId||'')+'|'+JSON.stringify(f._sourceChannels||[]);
+    if(KIKON_SOURCE_REPORT_CACHE.has(cacheKey)) return KIKON_SOURCE_REPORT_CACHE.get(cacheKey);
+    const catalog=kCachedChannelCatalog();
     const id=Number(f.fixture?.id||0);
     const sourceNames=Array.isArray(f?._sourceChannels)?f._sourceChannels.filter(x=>x&&x!=='Subscribe'):[];
     const rows=[];
     const seen=new Set();
     sourceNames.forEach(raw=>{
         const name=String(raw).trim();
-        const ch=catalog.find(x=>kChannelNamesMatch(name,x.name));
+        const result=findSmartChannelMatch(name);
+        const ch=result.channel;
         if(ch){
             const cid=Number(ch.id);
-            if(!seen.has(cid)){seen.add(cid);rows.push(`<button class="match-channel match-channel-rights" type="button" onclick="playKMatchChannel(${id},${cid},event)">${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(name)} ✓ تشغيل</span></button>`)}
+            if(!seen.has(cid)){seen.add(cid);rows.push(`<button class="match-channel match-channel-rights" type="button" onclick="playKMatchChannel(${id},${cid},event)">${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)} ✓ تشغيل</span></button>`)}
         }else{
-            rows.push(`<div class="match-channel match-channel-unavailable"><span>📺 ${kEsc(name)} · ناقل من الملف · غير موجود في قائمة التشغيل</span></div>`);
+            rows.push(`<div class="match-channel match-channel-unavailable"><span>📺 ${kEsc(name)} · لا توجد مطابقة مباشرة</span></div>`);
         }
     });
+    /* إذا فشلت مطابقة الناقل، نبحث عن بدائل محلية مرتبطة بالبطولة. */
+    if(!rows.length || rows.every(r=>r.includes('لا توجد مطابقة مباشرة'))){
+        const channels=kFindChannels(f);
+        channels.forEach(ch=>{
+            const cid=Number(ch.id); if(!Number.isFinite(cid)||seen.has(cid)) return;
+            seen.add(cid); rows.push(`<button class="match-channel match-channel-rights" type="button" onclick="playKMatchChannel(${id},${cid},event)">${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)} · بديل حسب حقوق البطولة</span></button>`);
+        });
+    }
     /* إذا لم يذكر جدول المباراة قناة، استخدم فقط حقوق البطولة المكتوبة محلياً. */
     if(!rows.length){
         const channels=kFindChannels(f);
@@ -1342,7 +1441,9 @@ function kSourceChannelReport(f){
             seen.add(cid); rows.push(`<button class="match-channel" type="button" onclick="playKMatchChannel(${id},${cid},event)">${ch.logo?`<img src="${kEsc(ch.logo)}" alt="">`:''}<span>${kEsc(ch.name)} · حقوق البطولة</span></button>`);
         });
     }
-    return rows.length ? `<div class="match-note">📺 الناقلون والقنوات كما وردت في ملفات المشروع:</div><div class="match-channel-list">${rows.join('')}</div>` : '<div class="match-note">📺 لا توجد قناة مكتوبة لهذه المباراة في الملفات.</div>';
+    const html=rows.length ? `<div class="match-note">📺 الناقلون والقنوات كما وردت في ملفات المشروع:</div><div class="match-channel-list">${rows.join('')}</div>` : '<div class="match-note">📺 لا توجد قناة مكتوبة لهذه المباراة في الملفات.</div>';
+    KIKON_SOURCE_REPORT_CACHE.set(cacheKey,html);
+    return html;
 }
 function kMatchCard(f) {
     const st=kEffectiveStatus(f);
@@ -1651,16 +1752,29 @@ function kRenderMatchesV3(){
   const q=kMatchSearch.trim().toLocaleLowerCase();
   if(q) list=list.filter(f=>kMatchSearchText(f).includes(q)).sort((a,b)=>kSearchScore(b,q)-kSearchScore(a,q));
 
+  /* العرض الأسبوعي قد يحتوي مئات البطاقات. نبني DOM على دفعات حتى لا تتجمد الواجهة. */
   if(kWeeklyReportMode==='week' || kWeeklyReportMode==='uefa'){
     list.sort((a,b)=>kMatchInstant(a.fixture?.date)-kMatchInstant(b.fixture?.date));
     const groups=new Map();
     list.forEach(f=>{const d=kLocalDateKey(f);if(!groups.has(d))groups.set(d,[]);groups.get(d).push(f);});
-    let out='';
-    for(const [date,items] of groups){
-      out+=`<div class="matches-day-header">📅 ${kEsc(kLocalDayName(date))} <span>${items.length} مباراة</span></div>`;
-      out+=`<div class="matches-row">${items.map(kMatchCard).join('')}</div>`;
-    }
-    host.innerHTML=out||'<div class="k-empty">لا توجد مباريات في هذا التصنيف.</div>';
+    const entries=[...groups.entries()];
+    host.innerHTML='<div class="matches-placeholder"><span style="font-size:1.8rem">⚽</span><span>جاري عرض مباريات الأسبوع...</span></div>';
+    let gi=0;
+    const renderBatch=()=>{
+      if(gi===0) host.innerHTML='';
+      const end=Math.min(gi+2,entries.length);
+      let out='';
+      for(;gi<end;gi++){
+        const [date,items]=entries[gi];
+        out+=`<div class="matches-day-header">📅 ${kEsc(kLocalDayName(date))} <span>${items.length} مباراة</span></div>`;
+        /* كل يوم دفعة واحدة؛ أقل كلفة بكثير من إعادة رسم القائمة كاملة. */
+        out+=`<div class="matches-row">${items.map(kMatchCard).join('')}</div>`;
+      }
+      host.insertAdjacentHTML('beforeend',out);
+      if(gi<entries.length) requestAnimationFrame(renderBatch);
+    };
+    if(!entries.length){host.innerHTML='<div class="k-empty">لا توجد مباريات في هذا التصنيف.</div>';return;}
+    requestAnimationFrame(renderBatch);
     return;
   }
 
@@ -1678,7 +1792,6 @@ function kRenderMatchesV3(){
   if(finished.length) out+=`<div class="matches-day-header">✅ النتائج النهائية <span>${finished.length}</span></div><div class="matches-row">${finished.map(kMatchCard).join('')}</div>`;
   host.innerHTML=out||'<div class="k-empty">لا توجد مباريات مطابقة.</div>';
 }
-
 function kEnsureMatchUI(){
   const root=document.getElementById('matchesList');
   if(!root) return;
@@ -1812,5 +1925,38 @@ document.addEventListener('click',e=>{
     if(card) card.classList.add('open');
   }
 },true);
-</script></body>
+</script>
+<script id="kikon-v68-ad-click-fix">
+(function(){
+  const p=document.getElementById('mainPlayer');
+  const box=document.getElementById('playerContainer');
+  if(!p||!box) return;
+  let lastLoad=0, lastSrc='';
+  function notice(){
+    let n=document.getElementById('kikonPlayerNotice');
+    if(!n){n=document.createElement('div');n.id='kikonPlayerNotice';n.textContent='⏳ جارٍ تحميل المشغل…';box.appendChild(n);}
+    n.style.display='block';
+    clearTimeout(n._t); n._t=setTimeout(()=>n.style.display='none',1800);
+  }
+  p.addEventListener('load',function(){lastLoad=Date.now();});
+  // منع الضغط المزدوج على عناصر التطبيق نفسها، مع ترك محتوى iframe للمشغل.
+  document.addEventListener('dblclick',function(e){
+    if(e.target.closest && e.target.closest('#playerContainer')){
+      e.preventDefault(); e.stopPropagation();
+    }
+  },true);
+  // إذا تم طلب نفس القناة عدة مرات خلال فترة قصيرة، لا نعيد إنشاء iframe.
+  const oldPlay=window.playChannel;
+  if(typeof oldPlay==='function'){
+    window.playChannel=function(id,el){
+      const src='https://dlhd.st/embed/stream-'+id+'.php';
+      if(p.getAttribute('src')===src && Date.now()-lastLoad<1500){
+        notice(); return;
+      }
+      lastSrc=src; return oldPlay.apply(this,arguments);
+    };
+  }
+})();
+</script>
+</body>
 </html>
